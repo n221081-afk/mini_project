@@ -121,7 +121,7 @@ export default function LeavePage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Leave Management</h1>
+        <h1 className="page-header">Leave Management</h1>
         <button onClick={() => setShowApply(true)} className="btn-primary w-fit">
           Apply Leave
         </button>
@@ -134,7 +134,7 @@ export default function LeavePage() {
           </div>
           <div className="card p-4">
             <p className="text-sm text-gray-500">Approved</p>
-            <p className="text-2xl font-bold text-green-600">{stats.approved ?? leaveRequests.filter((l) => l.status === 'approved').length}</p>
+            <p className="text-2xl font-bold text-primary-600">{stats.approved ?? leaveRequests.filter((l) => l.status === 'approved').length}</p>
           </div>
           <div className="card p-4">
             <p className="text-sm text-gray-500">Rejected</p>

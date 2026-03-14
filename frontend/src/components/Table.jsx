@@ -7,12 +7,12 @@ export default function Table({ columns, data, keyField = 'id', emptyMessage = '
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+        <thead className="bg-primary-50/50">
           <tr>
             {columns.map((col) => (
               <th
                 key={col.key}
-                className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider"
+                className="px-4 py-3 text-left text-xs font-medium text-dark/80 uppercase tracking-wider"
               >
                 {col.label}
               </th>
@@ -23,7 +23,7 @@ export default function Table({ columns, data, keyField = 'id', emptyMessage = '
           {data.map((row) => (
             <tr key={row[keyField]} className="hover:bg-gray-50">
               {columns.map((col) => (
-                <td key={col.key} className="px-4 py-3 text-sm text-gray-900">
+                <td key={col.key} className="px-4 py-3 text-sm text-dark">
                   {col.render ? col.render(row) : row[col.key]}
                 </td>
               ))}

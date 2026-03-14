@@ -43,7 +43,7 @@ export default function EmployeeProfilePage() {
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center gap-4">
         <Link to="/employees" className="text-gray-500 hover:text-gray-700">← Back</Link>
-        <h1 className="text-2xl font-bold text-gray-900">Employee Profile</h1>
+        <h1 className="page-header">Employee Profile</h1>
       </div>
       <div className="card p-6">
         <div className="flex items-start gap-6 mb-6">

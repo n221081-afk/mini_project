@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
+import Breadcrumbs from './components/Breadcrumbs';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import EmployeesPage from './pages/EmployeesPage';
@@ -30,11 +31,16 @@ function PrivateRoute({ children, allowedRoles }) {
 function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen" style={{ background: 'linear-gradient(180deg, rgba(209, 250, 229, 0.15) 0%, rgba(249, 250, 251, 1) 30%)' }}>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto">{children}</main>
+        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto">
+          <div className="max-w-7xl mx-auto">
+            <Breadcrumbs />
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );

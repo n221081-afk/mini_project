@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import DashboardCards from '../components/DashboardCards';
+import Breadcrumbs from '../components/Breadcrumbs';
 import { BarChart, DoughnutChart, LineChart } from '../components/Charts';
 import {
   employees,
@@ -44,7 +45,7 @@ export default function DashboardPage() {
         const deptList = Array.isArray(deptRes.data) ? deptRes.data : [];
         setDeptChartData({
           labels: deptList.map((d) => d.department_name || d.name),
-          datasets: [{ data: deptList.map((d) => d.employee_count || d.count || 0), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'] }],
+          datasets: [{ data: deptList.map((d) => d.employee_count || d.count || 0), backgroundColor: ['#10b981', '#059669', '#34d399', '#6ee7b7', '#047857'] }],
         });
         const attList = Array.isArray(attRes.data) ? attRes.data : [];
         const present = attList.reduce((s, r) => s + (r.present_days || 0), 0);
@@ -57,7 +58,7 @@ export default function DashboardPage() {
         const totalNet = pr?.total_net ?? pr?.monthlyPayrollCost ?? 0;
         setPayrollChartData({
           labels: [new Date().toISOString().slice(0, 7)],
-          datasets: [{ label: 'Total Payroll (₹)', data: [totalNet], fill: true, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)' }],
+          datasets: [{ label: 'Total Payroll (₹)', data: [totalNet], fill: true, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)' }],
         });
       } catch {
         const deptCount = {};
@@ -67,7 +68,7 @@ export default function DashboardPage() {
         });
         setDeptChartData({
           labels: Object.keys(deptCount),
-          datasets: [{ data: Object.values(deptCount), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'] }],
+          datasets: [{ data: Object.values(deptCount), backgroundColor: ['#10b981', '#059669', '#34d399', '#6ee7b7', '#047857'] }],
         });
         const today = new Date().toISOString().split('T')[0];
         const presentToday = attendanceRecords.filter((a) => a.date === today && a.status === 'present').length;
@@ -89,7 +90,7 @@ export default function DashboardPage() {
         });
         setPayrollChartData({
           labels: Object.keys(payrollCosts).sort(),
-          datasets: [{ label: 'Total Payroll (₹)', data: Object.keys(payrollCosts).sort().map((m) => payrollCosts[m]), fill: true, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)' }],
+          datasets: [{ label: 'Total Payroll (₹)', data: Object.keys(payrollCosts).sort().map((m) => payrollCosts[m]), fill: true, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)' }],
         });
       }
     };
@@ -105,16 +106,16 @@ export default function DashboardPage() {
   const activeEmployeesDummy = employees.filter((e) => e.status === 'active').length;
 
   const cards = [
-    { title: 'Total Employees', value: stats?.total_employees ?? employees.length, icon: '👥', iconBg: 'bg-blue-100' },
-    { title: 'Active Employees', value: stats?.active_employees ?? activeEmployeesDummy, icon: '✓', iconBg: 'bg-green-100' },
-    { title: 'Present Today', value: stats?.present_today ?? presentTodayDummy, icon: '🕐', iconBg: 'bg-amber-100' },
-    { title: 'Pending Leave Approvals', value: stats?.pending_leave_approvals ?? pendingLeavesDummy, icon: '📋', iconBg: 'bg-orange-100' },
-    { title: 'Payroll Processed (This Month)', value: stats?.payroll_processed_this_month ?? payrollThisMonthDummy, icon: '💰', iconBg: 'bg-emerald-100' },
+    { title: 'Total Employees', value: stats?.total_employees ?? employees.length, icon: '👥', iconBg: 'bg-primary-100' },
+    { title: 'Active Employees', value: stats?.active_employees ?? activeEmployeesDummy, icon: '✓', iconBg: 'bg-primary-100' },
+    { title: 'Present Today', value: stats?.present_today ?? presentTodayDummy, icon: '🕐', iconBg: 'bg-primary-50' },
+    { title: 'Pending Leave Approvals', value: stats?.pending_leave_approvals ?? pendingLeavesDummy, icon: '📋', iconBg: 'bg-primary-50' },
+    { title: 'Payroll Processed (This Month)', value: stats?.payroll_processed_this_month ?? payrollThisMonthDummy, icon: '💰', iconBg: 'bg-primary-100' },
   ];
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+      <h1 className="page-header">Dashboard</h1>
       {loading && !stats ? (
         <div className="py-12 text-center text-gray-500">Loading...</div>
       ) : (

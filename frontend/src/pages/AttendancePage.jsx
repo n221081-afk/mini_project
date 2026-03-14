@@ -78,7 +78,7 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Attendance</h1>
+      <h1 className="page-header">Attendance</h1>
       <div className="flex flex-col sm:flex-row gap-4 items-start">
         <div className="card p-6 flex gap-4">
           <button

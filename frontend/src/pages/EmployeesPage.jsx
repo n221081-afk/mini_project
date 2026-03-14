@@ -67,9 +67,9 @@ export default function EmployeesPage() {
         <span
           className={`px-2 py-1 rounded text-xs font-medium ${
             row.status === 'active'
-              ? 'bg-green-100 text-green-800'
+              ? 'bg-primary-100 text-primary-700'
               : row.status === 'on_leave'
-              ? 'bg-amber-100 text-amber-800'
+              ? 'bg-primary-50 text-primary-600'
               : 'bg-gray-100 text-gray-800'
           }`}
         >
@@ -94,7 +94,7 @@ export default function EmployeesPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Employees</h1>
+        <h1 className="page-header">Employees</h1>
         <Link to="/employees/add" className="btn-primary inline-flex items-center justify-center w-fit">
           + Add Employee
         </Link>
