@@ -8,5 +8,5 @@ export const leaveReport = (params) =>
   api.get('/reports/leave-report', { params });
 export const payrollSummary = (month) =>
   api.get('/reports/payroll-summary', { params: { month } });
-export const exportCSV = (type, params) =>
-  api.get('/reports/export', { params: { type, ...params }, responseType: 'blob' });
+export const exportCSV = (reportType, params) =>
+  api.get('/reports/export', { params: { report_type: reportType === 'dept' ? 'employees_by_dept' : reportType === 'attendance' ? 'monthly_attendance' : reportType, ...params }, responseType: 'blob' });

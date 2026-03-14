@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Table from '../components/Table';
 import Pagination from '../components/Pagination';
-import { employees, departments } from '../data/dummyData';
+import { employees, departments as dummyDepts } from '../data/dummyData';
 import { getAll } from '../services/employeeService';
+import { getAll as getDepartments } from '../services/departmentService';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -13,8 +14,18 @@ export default function EmployeesPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [deptFilter, setDeptFilter] = useState('');
+  const [departments, setDepartments] = useState(dummyDepts);
   const [loading, setLoading] = useState(true);
   const [useDummy, setUseDummy] = useState(false);
+
+  useEffect(() => {
+    getDepartments()
+      .then((res) => {
+        const list = Array.isArray(res.data) ? res.data : res.data?.data;
+        if (list?.length) setDepartments(list);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const fetch = async () => {

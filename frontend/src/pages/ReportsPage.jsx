@@ -26,7 +26,11 @@ export default function ReportsPage() {
       try {
         if (activeReport === 'dept') {
           const res = await employeesByDepartment();
-          setData(res.data ?? { departments: Object.entries(deptCount).map(([name, count]) => ({ name, count })) });
+          const raw = res.data;
+          const departments = Array.isArray(raw)
+            ? raw.map((d) => ({ name: d.department_name || d.name, count: d.employee_count || d.count }))
+            : Object.entries(deptCount).map(([name, count]) => ({ name, count }));
+          setData({ departments });
         } else if (activeReport === 'attendance') {
           const res = await monthlyAttendance(month);
           setData(res.data ?? []);
@@ -35,11 +39,12 @@ export default function ReportsPage() {
           setData(res.data ?? []);
         } else if (activeReport === 'payroll') {
           const res = await payrollSummary(month);
-          setData(res.data ?? []);
+          const d = res.data;
+          setData(d != null ? (Array.isArray(d) ? d : [d]) : []);
         }
       } catch {
         if (activeReport === 'dept') setData({ departments: Object.entries(deptCount).map(([name, count]) => ({ name, count })) });
-        else setData([]);
+        else setData(null);
       } finally {
         setLoading(false);
       }
@@ -114,8 +119,8 @@ export default function ReportsPage() {
                 </tbody>
               </table>
             )}
-            {(activeReport === 'attendance' || activeReport === 'leave' || activeReport === 'payroll') && Array.isArray(data) && (
-              <pre className="text-sm overflow-auto max-h-96">{JSON.stringify(data.slice(0, 10), null, 2)}</pre>
+            {(activeReport === 'attendance' || activeReport === 'leave' || activeReport === 'payroll') && data != null && (
+              <pre className="text-sm overflow-auto max-h-96">{JSON.stringify(Array.isArray(data) ? data.slice(0, 10) : data, null, 2)}</pre>
             )}
             {!data && <p className="text-gray-500">No data</p>}
           </div>

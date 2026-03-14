@@ -1,16 +1,17 @@
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-const menuItems = [
-  { path: '/', icon: 'dashboard', label: 'Dashboard' },
-  { path: '/employees', icon: 'people', label: 'Employees' },
-  { path: '/departments', icon: 'business', label: 'Departments' },
-  { path: '/attendance', icon: 'schedule', label: 'Attendance' },
-  { path: '/leave', icon: 'event_available', label: 'Leaves' },
-  { path: '/payroll', icon: 'payments', label: 'Payroll' },
-  { path: '/recruitment', icon: 'work', label: 'Recruitment' },
-  { path: '/performance', icon: 'star', label: 'Performance' },
-  { path: '/reports', icon: 'assessment', label: 'Reports' },
-  { path: '/settings', icon: 'settings', label: 'Settings' },
+const allMenuItems = [
+  { path: '/', icon: 'dashboard', label: 'Dashboard', roles: ['admin', 'hr_manager', 'employee'] },
+  { path: '/employees', icon: 'people', label: 'Employees', roles: ['admin', 'hr_manager'] },
+  { path: '/departments', icon: 'business', label: 'Departments', roles: ['admin', 'hr_manager'] },
+  { path: '/attendance', icon: 'schedule', label: 'Attendance', roles: ['admin', 'hr_manager', 'employee'] },
+  { path: '/leave', icon: 'event_available', label: 'Leaves', roles: ['admin', 'hr_manager', 'employee'] },
+  { path: '/payroll', icon: 'payments', label: 'Payroll', roles: ['admin', 'hr_manager', 'employee'] },
+  { path: '/recruitment', icon: 'work', label: 'Recruitment', roles: ['admin', 'hr_manager'] },
+  { path: '/performance', icon: 'star', label: 'Performance', roles: ['admin', 'hr_manager'] },
+  { path: '/reports', icon: 'assessment', label: 'Reports', roles: ['admin', 'hr_manager'] },
+  { path: '/settings', icon: 'settings', label: 'Settings', roles: ['admin', 'hr_manager', 'employee'] },
 ];
 
 const icons = {
@@ -27,6 +28,9 @@ const icons = {
 };
 
 export default function Sidebar({ open, onClose }) {
+  const { user } = useAuth();
+  const role = user?.role || 'employee';
+  const menuItems = allMenuItems.filter((item) => !item.roles || item.roles.includes(role));
   return (
     <>
       {open && (
