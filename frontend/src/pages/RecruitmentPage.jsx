@@ -56,7 +56,7 @@ export default function RecruitmentPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Recruitment</h1>
+      <h1 className="page-header">Recruitment</h1>
       <div className="card overflow-hidden">
         {loading ? (
           <div className="py-12 text-center text-gray-500">Loading...</div>

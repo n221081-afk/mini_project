@@ -4,12 +4,12 @@ export default function DashboardCards({ cards }) {
       {cards.map((card) => (
         <div
           key={card.title}
-          className="card p-6 hover:shadow-lg transition-shadow"
+          className="card p-6 hover:shadow-md transition-all rounded-2xl"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500">{card.title}</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{card.value}</p>
+              <p className="text-2xl font-bold text-dark mt-1">{card.value}</p>
               {card.subtitle && (
                 <p className="text-xs text-gray-400 mt-1">{card.subtitle}</p>
               )}

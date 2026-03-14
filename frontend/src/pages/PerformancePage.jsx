@@ -51,7 +51,7 @@ export default function PerformancePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Performance</h1>
+      <h1 className="page-header">Performance</h1>
       <div className="card p-6">
         <h2 className="text-lg font-semibold mb-4">Performance Ratings (Top 8)</h2>
         <BarChart data={chartData} height={250} />

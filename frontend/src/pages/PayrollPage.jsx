@@ -88,7 +88,7 @@ export default function PayrollPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Payroll</h1>
+        <h1 className="page-header">Payroll</h1>
         <div className="flex gap-3">
           <input
             type="month"

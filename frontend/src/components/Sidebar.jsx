@@ -31,17 +31,18 @@ export default function Sidebar({ open, onClose }) {
   const { user } = useAuth();
   const role = user?.role || 'employee';
   const menuItems = allMenuItems.filter((item) => !item.roles || item.roles.includes(role));
+
   return (
     <>
       {open && (
         <div
-          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          className="fixed inset-0 bg-black/30 z-20 lg:hidden"
           onClick={onClose}
           aria-hidden="true"
         />
       )}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out ${
+        className={`fixed lg:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-100 transform transition-transform duration-200 ease-in-out ${
           open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
@@ -54,10 +55,10 @@ export default function Sidebar({ open, onClose }) {
                 end={item.path === '/'}
                 onClick={() => onClose?.()}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                  `flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
                     isActive
                       ? 'bg-primary-50 text-primary-700 font-medium'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      : 'text-dark/80 hover:bg-gray-50'
                   }`
                 }
               >

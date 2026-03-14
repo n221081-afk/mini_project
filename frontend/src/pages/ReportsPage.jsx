@@ -76,7 +76,7 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
+      <h1 className="page-header">Reports</h1>
       <div className="flex flex-col sm:flex-row gap-4 items-start">
         <div className="flex flex-wrap gap-2">
           {reports.map((r) => (

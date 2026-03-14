@@ -5,7 +5,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <h1 className="text-2xl font-bold text-gray-900">Profile Settings</h1>
+      <h1 className="page-header">Profile Settings</h1>
       <div className="card p-6 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-500">Name</label>
