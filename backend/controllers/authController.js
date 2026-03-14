@@ -6,7 +6,7 @@ const Employee = require('../models/Employee');
 
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
+    { id: user._id || user.id, email: user.email, role: user.role },
     process.env.JWT_SECRET || 'your-jwt-secret-key',
     { expiresIn: '7d' }
   );

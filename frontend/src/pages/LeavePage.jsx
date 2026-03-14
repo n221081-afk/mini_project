@@ -24,7 +24,15 @@ export default function LeavePage() {
       try {
         const [res, st] = await Promise.all([getAll(), getStats()]);
         setLeaves(Array.isArray(res.data) ? res.data : res.data?.data || leaveRequests);
-        setStats(st.data || { pending: 3, approved: 5, rejected: 2 });
+        const rawStats = st.data;
+        if (Array.isArray(rawStats)) {
+          const pending = rawStats.filter((s) => s.status === 'pending').reduce((a, s) => a + (s.count || 0), 0);
+          const approved = rawStats.filter((s) => s.status === 'approved').reduce((a, s) => a + (s.count || 0), 0);
+          const rejected = rawStats.filter((s) => s.status === 'rejected').reduce((a, s) => a + (s.count || 0), 0);
+          setStats({ pending, approved, rejected });
+        } else {
+          setStats(rawStats || { pending: 3, approved: 5, rejected: 2 });
+        }
       } catch {
         setLeaves(leaveRequests);
         setStats({ pending: leaveRequests.filter((l) => l.status === 'pending').length });

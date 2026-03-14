@@ -17,10 +17,14 @@ import PerformancePage from './pages/PerformancePage';
 import ReportsPage from './pages/ReportsPage';
 import SettingsPage from './pages/SettingsPage';
 
-function PrivateRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+function PrivateRoute({ children, allowedRoles }) {
+  const { isAuthenticated, loading, user } = useAuth();
   if (loading) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (allowedRoles && user?.role && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
 }
 
 function Layout({ children }) {
@@ -55,7 +59,7 @@ export default function App() {
           <Route
             path="/employees"
             element={
-              <PrivateRoute>
+              <PrivateRoute allowedRoles={['admin', 'hr_manager']}>
                 <Layout>
                   <EmployeesPage />
                 </Layout>
@@ -65,7 +69,7 @@ export default function App() {
           <Route
             path="/employees/add"
             element={
-              <PrivateRoute>
+              <PrivateRoute allowedRoles={['admin', 'hr_manager']}>
                 <Layout>
                   <AddEmployeePage />
                 </Layout>
@@ -85,7 +89,7 @@ export default function App() {
           <Route
             path="/departments"
             element={
-              <PrivateRoute>
+              <PrivateRoute allowedRoles={['admin', 'hr_manager']}>
                 <Layout>
                   <DepartmentsPage />
                 </Layout>
@@ -125,7 +129,7 @@ export default function App() {
           <Route
             path="/recruitment"
             element={
-              <PrivateRoute>
+              <PrivateRoute allowedRoles={['admin', 'hr_manager']}>
                 <Layout>
                   <RecruitmentPage />
                 </Layout>
@@ -135,7 +139,7 @@ export default function App() {
           <Route
             path="/performance"
             element={
-              <PrivateRoute>
+              <PrivateRoute allowedRoles={['admin', 'hr_manager']}>
                 <Layout>
                   <PerformancePage />
                 </Layout>
@@ -145,7 +149,7 @@ export default function App() {
           <Route
             path="/reports"
             element={
-              <PrivateRoute>
+              <PrivateRoute allowedRoles={['admin', 'hr_manager']}>
                 <Layout>
                   <ReportsPage />
                 </Layout>
