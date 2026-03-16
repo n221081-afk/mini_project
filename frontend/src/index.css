@@ -16,10 +16,10 @@
     @apply bg-white rounded-2xl shadow-sm border border-gray-100;
   }
   .btn-primary {
-    @apply px-6 py-3 bg-primary-500 text-white font-medium rounded-pill hover:bg-primary-600 transition-colors focus:ring-2 focus:ring-primary-300 focus:ring-offset-2;
+    @apply px-6 py-3 bg-primary-500 text-white font-medium rounded-full hover:bg-primary-600 transition-colors focus:ring-2 focus:ring-primary-300 focus:ring-offset-2;
   }
   .btn-secondary {
-    @apply px-6 py-3 bg-white text-dark font-medium rounded-pill border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-colors;
+    @apply px-6 py-3 bg-white text-dark font-medium rounded-full border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-colors;
   }
   .input-field {
     @apply w-full px-4 py-2.5 border border-gray-200 rounded-xl text-dark placeholder-gray-400 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-colors;
@@ -28,6 +28,14 @@
     @apply text-2xl font-bold text-dark;
   }
   .banner-pill {
-    @apply inline-flex items-center gap-2 px-4 py-2 rounded-pill bg-gray-50/80 border border-primary-200/60 text-dark text-sm;
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-50/80 border border-primary-200/60 text-dark text-sm;
   }
 }
+
+/* Dashboard styles merged from src/styles.css */
+.dashboard { padding: 1rem }
+.summary-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem }
+.card { background:#fff; border: 1px solid #eee; padding: 1rem; border-radius: 6px }
+.card .big { font-size: 2rem; margin: 0.5rem 0 }
+.charts { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem }
+.chart-card { background:#fff; border:1px solid #eee; padding:1rem; border-radius:6px }
