@@ -2,15 +2,27 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
   username: { type: String, sparse: true },
-  email: { type: String, sparse: true },
+
+  email: { 
+    type: String,
+    unique: true,
+    sparse: true
+  },
+
   name: { type: String },
+
   password: { type: String, required: true },
-  role: { type: String, enum: ['admin', 'hr_manager', 'hr', 'manager', 'employee'], default: 'employee' },
+
+  role: { 
+    type: String,
+    enum: ['admin', 'hr_manager', 'hr', 'manager', 'employee'],
+    default: 'employee'
+  },
+
   employee: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
+
   createdAt: { type: Date, default: Date.now }
 });
-
-userSchema.index({ email: 1 }, { unique: true, sparse: true });
 
 const User = mongoose.model('User', userSchema);
 
