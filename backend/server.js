@@ -6,6 +6,16 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 require('./config/db');
 
+// ✅ ADD MODELS HERE (CRITICAL)
+require('./models/Employee');
+require('./models/Attendance');
+require('./models/Leave');
+require('./models/Payroll');
+require('./models/Department'); 
+require('./models/Performance'); 
+require('./models/Recruitment'); // if used
+require('./models/User'); // if auth uses it
+
 const authRoutes = require('./routes/authRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
@@ -36,8 +46,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/attendance', attendanceRoutes);
-app.use('/api/leave', leaveRoutes);
-app.use('/api/payroll', payrollRoutes);
+app.use('/api/leaves', leaveRoutes);
+app.use('/api/payrolls', payrollRoutes);
 app.use('/api/recruitment', recruitmentRoutes);
 app.use('/api/performance', performanceRoutes);
 app.use('/api/reports', reportRoutes);
