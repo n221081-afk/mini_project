@@ -51,15 +51,16 @@ exports.create = async (req, res) => {
     }
 
     let userId = null;
-    if (req.body.create_user_account === true && req.body.password) {
-      const hashedPassword = await bcrypt.hash(req.body.password, 10);
-      userId = await User.create({
-        name: `${req.body.first_name} ${req.body.last_name}`,
-        email: req.body.email,
-        password: hashedPassword,
-        role: 'employee'
-      });
-    }
+    const password = req.body.password || "Temp@123";
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    userId = await User.create({
+    name: `${req.body.first_name} ${req.body.last_name}`,
+    email: req.body.email,
+    password: hashedPassword,
+    role: "employee"
+  });
 
     const employeeData = {
       ...req.body,
