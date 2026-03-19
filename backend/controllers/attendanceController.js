@@ -3,12 +3,17 @@ const Employee = require('../models/Employee');
 
 exports.clockIn = async (req, res) => {
   try {
+    if (req.user.role !== "employee") {
+      return res.status(403).json({
+        message: "Only employees can clock in"
+      });
+    }
     const employeeId = req.body.employee_id || (await Employee.findByUserId(req.user.id))?.id;
     if (!employeeId) {
       return res.status(400).json({ message: 'Employee ID required' });
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().slice(0,10);
     const existing = await Attendance.findByEmployeeAndDate(employeeId, today);
 
     if (existing && existing.clock_in) {
@@ -26,12 +31,17 @@ exports.clockIn = async (req, res) => {
 
 exports.clockOut = async (req, res) => {
   try {
+    if (req.user.role !== "employee") {
+      return res.status(403).json({
+      message: "Only employees can clock out"
+      });
+    }
     const employeeId = req.body.employee_id || (await Employee.findByUserId(req.user.id))?.id;
     if (!employeeId) {
       return res.status(400).json({ message: 'Employee ID required' });
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().slice(0,10);
     const existing = await Attendance.findByEmployeeAndDate(employeeId, today);
 
     if (!existing) {

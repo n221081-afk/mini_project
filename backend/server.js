@@ -47,7 +47,7 @@ app.use('/api/employees', employeeRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/leaves', leaveRoutes);
-app.use('/api/payrolls', payrollRoutes);
+app.use('/api/payroll', payrollRoutes);
 app.use('/api/recruitment', recruitmentRoutes);
 app.use('/api/performance', performanceRoutes);
 app.use('/api/reports', reportRoutes);

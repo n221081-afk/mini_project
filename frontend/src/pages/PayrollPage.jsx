@@ -54,12 +54,13 @@ export default function PayrollPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `payslip-${id}.pdf`;
+      a.download = `payslip-${r.employee_code}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-    } catch {
-      alert('Payslip download (demo - backend required)');
-    }
+    } catch (err) {
+        console.error("Download error:", err);
+        alert("Payslip download failed");
+}
   };
 
   const columns = [
@@ -76,7 +77,7 @@ export default function PayrollPage() {
       label: 'Actions',
       render: (r) => (
         <button
-          onClick={() => handleDownload(r.id)}
+          onClick={() => handleDownload(r._id)}
           className="text-primary-600 hover:underline text-sm"
         >
           Download Payslip
@@ -110,7 +111,7 @@ export default function PayrollPage() {
           <div className="py-12 text-center text-gray-500">Loading...</div>
         ) : (
           <>
-            <Table columns={columns} data={data} keyField="id" emptyMessage="No payroll records" />
+            <Table columns={columns} data={data} keyField="_id" emptyMessage="No payroll records" />
             <Pagination page={page} totalPages={Math.ceil(total / ITEMS_PER_PAGE)} onPageChange={setPage} />
           </>
         )}

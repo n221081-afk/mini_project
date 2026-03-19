@@ -37,11 +37,30 @@ exports.apply = async (req, res) => {
     if (!employee) {
       return res.status(400).json({ message: 'Employee profile not found' });
     }
-    const leaveData = { ...req.body, employee_id: employee.id, status: 'pending' };
+    const { start_date, end_date } = req.body;
+
+// DATE VALIDATION
+    if (!start_date || !end_date) {
+      return res.status(400).json({ message: "Start date and end date required" });
+    }
+
+    if (new Date(start_date) > new Date(end_date)) {
+      return res.status(400).json({
+        message: "Start date cannot be greater than end date"
+      });
+    }
+
+    const leaveData = {
+      ...req.body,
+      employee_id: employee.id,
+      status: 'pending'
+    };
+
     const id = await Leave.create(leaveData);
     const leave = await Leave.findById(id);
     res.status(201).json(leave);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 };

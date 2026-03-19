@@ -29,6 +29,7 @@ Employee.findByUserId = async function (userId) {
     ...doc,
     id: doc._id,
     department_name: d?.name,
+    department_code: d?.code,
     first_name: doc.first_name || doc.firstName,
     last_name: doc.last_name || doc.lastName,
   };
@@ -58,6 +59,7 @@ Employee.findAll = async function (filters = {}) {
     ...d,
     id: d._id,
     department_name: d.department?.name,
+    department_code: d.department?.code,
     department_id: d.department?._id,
     first_name: d.first_name || d.firstName,
     last_name: d.last_name || d.lastName,
@@ -86,6 +88,7 @@ Employee.findById = async function (id) {
     ...doc,
     id: doc._id,
     department_name: doc.department?.name,
+    department_code: d.department?.code,
     department_id: doc.department?._id,
     first_name: doc.first_name || doc.firstName,
     last_name: doc.last_name || doc.lastName,

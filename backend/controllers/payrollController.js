@@ -39,10 +39,14 @@ exports.generateMonthly = async (req, res) => {
     const { month } = req.body;
     const payrollMonth = month || new Date().toISOString().slice(0, 7);
 
-    const employees = await Employee.find({ status: 'active' }).select('_id salary').lean();
+    const employees = await Employee.find({}).select('_id salary').lean();
 
     for (const emp of employees) {
-      const calc = calculateNetSalary(emp.salary || 0);
+      if (!emp.salary || emp.salary <= 0) {
+        continue; // skip employee with invalid salary
+      }
+
+      const calc = calculateNetSalary(emp.salary);
       await Payroll.upsert({
         employee_id: emp._id,
         month: payrollMonth,
@@ -61,7 +65,8 @@ exports.generateMonthly = async (req, res) => {
     const payroll = await Payroll.findAll({ month: payrollMonth });
     res.json({ message: 'Payroll generated', data: payroll });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error("GENERATE PAYROLL ERROR:", error);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -77,7 +82,7 @@ exports.downloadPayslip = async (req, res) => {
     }
 
     const payslipData = {
-      employeeName: `${payroll.first_name} ${payroll.last_name}`,
+      employeeName: `${payroll.first_name || ""} ${payroll.last_name || ""}`,
       employeeCode: payroll.employee_code,
       month: payroll.month,
       basicSalary: payroll.basic_salary,
@@ -92,9 +97,10 @@ exports.downloadPayslip = async (req, res) => {
 
     const pdfBuffer = await generatePayslipPDF(payslipData);
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=payslip-${payroll.employee_code}-${payroll.month}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename=payslip-${payroll.employee_code || "employee"}-${payroll.month}.pdf`);
     res.send(pdfBuffer);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error("PAYSLIP ERROR:", error);
+    res.status(500).json({ message: error.message});
   }
 };
