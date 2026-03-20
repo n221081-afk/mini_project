@@ -64,8 +64,13 @@ exports.exportCSV = async (req, res) => {
     let headers = [];
 
     if (report_type === 'employees_by_dept') {
-      const report = await Department.findAll();
-      data = report.map(r => ({ department_name: r.name, employee_count: r.employee_count }));
+      // Compute counts with the same pipeline as `employeesByDepartment`.
+      const report = await Department.aggregate([
+        { $lookup: { from: 'employees', localField: '_id', foreignField: 'department', as: 'emps' } },
+        { $addFields: { employee_count: { $size: { $filter: { input: '$emps', as: 'e', cond: { $eq: ['$$e.status', 'active'] } } } } } },
+        { $project: { department_name: '$name', employee_count: 1, _id: 0 } },
+      ]);
+      data = report;
       headers = ['department_name', 'employee_count'];
     } else if (report_type === 'monthly_attendance') {
       const month = params.month || new Date().toISOString().slice(0, 7);
