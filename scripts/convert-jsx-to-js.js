@@ -1,6 +1,6 @@
 // ...existing code...
 /**
- * Rename .jsx -> .js and update references across the workspace.
+ * Rename .js -> .js and update references across the workspace.
  *
  * Usage:
  *   node scripts/convert-jsx-to-js.js --root . --dry-run
@@ -19,7 +19,7 @@ const root = rootArgIndex !== -1 ? path.resolve(args[rootArgIndex + 1]) : proces
 const dryRun = args.includes('--dry-run');
 
 const IGNORE_DIRS = new Set(['node_modules', '.git']);
-const TEXT_EXTS = new Set(['.js', '.jsx', '.ts', '.tsx', '.json', '.html', '.css', '.md', '.mjs', '.cjs']);
+const TEXT_EXTS = new Set(['.js', '.js', '.ts', '.tsx', '.json', '.html', '.css', '.md', '.mjs', '.cjs']);
 
 async function walk(dir) {
   const out = [];
@@ -37,22 +37,22 @@ async function walk(dir) {
 }
 
 function replaceJsxExtsInText(text) {
-  // Replace explicit ".jsx" in imports/require/dynamic imports and common references with ".js"
-  // Handles: import x from './Foo.jsx'; require('./Foo.jsx'); "Foo.jsx", './Foo.jsx?param'
-  // Also replace regex-like /\.jsx$/ -> /\.jsx?$/ to allow .js too in configs.
+  // Replace explicit ".js" in imports/require/dynamic imports and common references with ".js"
+  // Handles: import x from './Foo.js'; require('./Foo.js'); "Foo.js", './Foo.js?param'
+  // Also replace regex-like /.jsx?$/ -> /\.jsx?$/ to allow .js too in configs.
   let s = text.replace(/(['"`])((?:\.\.\/|\.\/)?[A-Za-z0-9_\/\.-]+)\.jsx(\b|['"`\)\s;:,?\\])/g, (m, q, p, tail) => {
     return `${q}${p}.js${tail}`;
   });
 
-  // Replace occurrences like /\.jsx$/ -> /\.jsx?$/
+  // Replace occurrences like /.jsx?$/ -> /\.jsx?$/
   s = s.replace(/\\\/\.jsx\\\$\//g, '\\/.jsx?\\/$'); // rarely matched, but keep
-  s = s.replace(/\/\\?\.jsx\\?\$\//g, '/.jsx?$/'); // best-effort normalizations
+  s = s.replace(/\/\\?\.jsx\\?\$\//g, '/.js?$/'); // best-effort normalizations
 
-  // Replace simple /\.jsx$/ occurrences
-  s = s.replace(/\\\/\.jsx\\\$\//g, '/.jsx?$/');
-  s = s.replace(/\/\.jsx\$/g, '/.jsx?');
+  // Replace simple /.jsx?$/ occurrences
+  s = s.replace(/\\\/\.jsx\\\$\//g, '/.js?$/');
+  s = s.replace(/\/.jsx?$/g, '/.js?');
 
-  // Replace explicit ".jsx" strings in configs/plugin options to ".js"
+  // Replace explicit ".js" strings in configs/plugin options to ".js"
   s = s.replace(/\.jsx(["'\)\s;,:}])/g, '.js$1');
 
   return s;
@@ -64,16 +64,16 @@ async function updateConfigs(filePath, dryRun) {
   let content = await fs.readFile(filePath, 'utf8');
   let updated = content;
 
-  // webpack: make /\.jsx$/ => /\.jsx?$/ and update resolve.extensions arrays
+  // webpack: make /.jsx?$/ => /\.jsx?$/ and update resolve.extensions arrays
   if (name.includes('webpack') || name.includes('vite') || name === 'rollup.config.js') {
-    updated = updated.replace(/\/\\?\.jsx\\?\/\$\?/g, '/.jsx?/');
-    updated = updated.replace(/\/\.jsx\$/g, '/.jsx?'); // best effort
-    // Replace explicit '.jsx' extension in arrays like extensions: ['.js', '.jsx']
+    updated = updated.replace(/\/\\?\.jsx\\?\/\$\?/g, '/.js?/');
+    updated = updated.replace(/\/.jsx?$/g, '/.js?'); // best effort
+    // Replace explicit '.js' extension in arrays like extensions: ['.js', '.js']
     updated = updated.replace(/(\bextensions\s*:\s*\[)([^\]]+)\]/g, (m, p1, inner) => {
       let parts = inner.split(',').map(s => s.trim().replace(/['"]/g, ''));
-      // ensure '.js' present, remove '.jsx' (we will rename files)
+      // ensure '.js' present, remove '.js' (we will rename files)
       if (!parts.includes('.js')) parts.unshift('.js');
-      parts = parts.filter(x => x !== '.jsx');
+      parts = parts.filter(x => x !== '.js');
       const joined = parts.map(x => `'${x}'`).join(', ');
       return `${p1}${joined}]`;
     });
@@ -96,7 +96,7 @@ async function updateConfigs(filePath, dryRun) {
       }
       if (json.include) {
         const inc = JSON.stringify(json.include);
-        if (inc.includes('*.jsx') || inc.includes('**/*.jsx')) {
+        if (inc.includes('*.js') || inc.includes('**/*.js')) {
           json.include = json.include.map(i => i.replace(/\.jsx/g, '.js'));
           changed = true;
         }
@@ -119,12 +119,12 @@ async function main() {
   console.log(`Scanning ${root} (dryRun=${dryRun})`);
   const all = await walk(root);
 
-  const jsxFiles = all.filter(f => f.endsWith('.jsx'));
+  const jsxFiles = all.filter(f => f.endsWith('.js'));
   if (jsxFiles.length === 0) {
-    console.log('No .jsx files found.');
+    console.log('No .js files found.');
   } else {
     for (const oldPath of jsxFiles) {
-      const newPath = oldPath.replace(/\.jsx$/, '.js');
+      const newPath = oldPath.replace(/.jsx?$/, '.js');
       console.log(`${dryRun ? '[DRY] Rename' : 'Rename'}: ${oldPath} -> ${newPath}`);
       if (!dryRun) {
         // skip if target exists
