@@ -24,32 +24,13 @@ const LeaveModel = {
     if (filters.offset) q = q.skip(parseInt(filters.offset));
 
     const docs = await q.lean();
-    return docs.map((d) => ({
-      ...d,
-      id: d._id,
-      employee_id: d.employee?._id,
-      employeeId: d.employee?._id,
-      first_name: d.employee?.first_name,
-      last_name: d.employee?.last_name,
-      employee_code: d.employee?.employee_code,
-      email: d.employee?.email,
-    }));
+    return docs.map(d => ({ ...d, employee_id: d.employee?._id, first_name: d.employee?.first_name, last_name: d.employee?.last_name, employee_code: d.employee?.employee_code, email: d.employee?.email }));
   },
 
   findById: async (id) => {
     const doc = await Leave.findById(id).populate('employee', 'first_name last_name employee_code email department').lean();
     if (!doc) return null;
-    return {
-      ...doc,
-      id: doc._id,
-      employee_id: doc.employee?._id,
-      employeeId: doc.employee?._id,
-      first_name: doc.employee?.first_name,
-      last_name: doc.employee?.last_name,
-      employee_code: doc.employee?.employee_code,
-      email: doc.employee?.email,
-      department_id: doc.employee?.department,
-    };
+    return { ...doc, employee_id: doc.employee?._id, first_name: doc.employee?.first_name, last_name: doc.employee?.last_name, employee_code: doc.employee?.employee_code, email: doc.employee?.email, department_id: doc.employee?.department };
   },
 
   create: async (data) => {

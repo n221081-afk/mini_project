@@ -4,7 +4,6 @@ const Employee = require('../models/Employee');
 const Attendance = require('../models/Attendance');
 const Leave = require('../models/Leave');
 const Payroll = require('../models/Payroll');
-const { sendError, sendSuccess } = require('../utils/apiResponse');
 
 exports.employeesByDepartment = async (req, res) => {
   try {
@@ -14,17 +13,9 @@ exports.employeesByDepartment = async (req, res) => {
       { $addFields: { employee_count: { $size: { $filter: { input: '$emps', as: 'e', cond: { $eq: ['$$e.status', 'active'] } } } } } },
       { $project: { department_name: '$name', employee_count: 1, _id: 0 } }
     ]);
-    const labels = report.map((r) => r.department_name);
-    const data = report.map((r) => r.employee_count);
-    const palette = ['#10b981', '#059669', '#34d399', '#6ee7b7', '#047857'];
-    const backgroundColor = data.map((_, i) => palette[i % palette.length]);
-
-    return sendSuccess(res, {
-      labels,
-      datasets: [{ data, backgroundColor }],
-    });
+    res.json(report);
   } catch (error) {
-    return sendError(res, 500, 'Server error', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -33,22 +24,9 @@ exports.monthlyAttendance = async (req, res) => {
     const { month } = req.query;
     const reportMonth = month || new Date().toISOString().slice(0, 7);
     const report = await Attendance.getMonthlyReport(reportMonth);
-    const present = report.reduce((sum, r) => sum + (r.present_days || 0), 0);
-    const absent = report.reduce((sum, r) => sum + (r.absent_days || 0), 0);
-    const half = report.reduce((sum, r) => sum + (r.half_days || 0), 0);
-    const leave = report.reduce((sum, r) => sum + (r.leave_days || 0), 0);
-
-    return sendSuccess(res, {
-      labels: ['Present', 'Absent', 'Half Day', 'Leave'],
-      datasets: [
-        {
-          data: [present, absent, half, leave],
-          backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#6366f1'],
-        },
-      ],
-    });
+    res.json(report);
   } catch (error) {
-    return sendError(res, 500, 'Server error', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -58,44 +36,24 @@ exports.leaveReport = async (req, res) => {
     const end = end_date || new Date().toISOString().split('T')[0];
     const start = start_date || new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     const stats = await Leave.getLeaveStats(start, end);
-    return sendSuccess(res, stats);
+    res.json(stats);
   } catch (error) {
-    return sendError(res, 500, 'Server error', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
 exports.payrollSummary = async (req, res) => {
   try {
+    const { month } = req.query;
+    const reportMonth = month || new Date().toISOString().slice(0, 7);
     const PayrollModel = mongoose.model('Payroll');
-    // Get last 12 months
-    const months = [];
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date();
-      d.setMonth(d.getMonth() - i);
-      months.push(d.toISOString().slice(0, 7));
-    }
-    const results = await PayrollModel.aggregate([
-      { $match: { month: { $in: months } } },
-      { $group: { _id: '$month', total_net: { $sum: '$net_salary' } } }
+    const result = await PayrollModel.aggregate([
+      { $match: { month: reportMonth } },
+      { $group: { _id: '$month', employee_count: { $sum: 1 }, total_basic: { $sum: '$basic_salary' }, total_net: { $sum: '$net_salary' }, total_tax: { $sum: '$tax' }, total_pf: { $sum: '$pf' } } }
     ]);
-    const dataMap = {};
-    results.forEach(r => dataMap[r._id] = r.total_net);
-    const data = months.map(m => dataMap[m] || 0);
-
-    return sendSuccess(res, {
-      labels: months,
-      datasets: [
-        {
-          label: 'Total Payroll (₹)',
-          data,
-          fill: true,
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        },
-      ],
-    });
+    res.json(result[0] || {});
   } catch (error) {
-    return sendError(res, 500, 'Server error', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -106,6 +64,7 @@ exports.exportCSV = async (req, res) => {
     let headers = [];
 
     if (report_type === 'employees_by_dept') {
+      // Compute counts with the same pipeline as `employeesByDepartment`.
       const report = await Department.aggregate([
         { $lookup: { from: 'employees', localField: '_id', foreignField: 'department', as: 'emps' } },
         { $addFields: { employee_count: { $size: { $filter: { input: '$emps', as: 'e', cond: { $eq: ['$$e.status', 'active'] } } } } } },
@@ -119,7 +78,7 @@ exports.exportCSV = async (req, res) => {
       data = report.map(r => ({ employee_code: r.employee_code, first_name: r.first_name, last_name: r.last_name, department: r.department_name, present: r.present_days, absent: r.absent_days }));
       headers = ['employee_code', 'first_name', 'last_name', 'department', 'present', 'absent'];
     } else {
-      return sendError(res, 400, 'Invalid report_type');
+      return res.status(400).json({ message: 'Invalid report_type' });
     }
 
     const csvHeader = headers.join(',');
@@ -130,6 +89,6 @@ exports.exportCSV = async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename=report-${report_type}.csv`);
     res.send(csv);
   } catch (error) {
-    return sendError(res, 500, 'Server error', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
