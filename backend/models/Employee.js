@@ -28,6 +28,8 @@ Employee.findByUserId = async function (userId) {
   return {
     ...doc,
     id: doc._id,
+    employee_id: doc._id,
+    employeeId: doc._id,
     department_name: d?.name,
     department_code: d?.code,
     first_name: doc.first_name || doc.firstName,
@@ -58,6 +60,8 @@ Employee.findAll = async function (filters = {}) {
   return docs.map((d) => ({
     ...d,
     id: d._id,
+    employee_id: d._id,
+    employeeId: d._id,
     department_name: d.department?.name,
     department_code: d.department?.code,
     department_id: d.department?._id,
@@ -87,8 +91,10 @@ Employee.findById = async function (id) {
   return {
     ...doc,
     id: doc._id,
+    employee_id: doc._id,
+    employeeId: doc._id,
     department_name: doc.department?.name,
-    department_code: d.department?.code,
+    department_code: doc.department?.code,
     department_id: doc.department?._id,
     first_name: doc.first_name || doc.firstName,
     last_name: doc.last_name || doc.lastName,

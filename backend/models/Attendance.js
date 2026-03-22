@@ -14,6 +14,20 @@ attendanceSchema.index({ employee: 1, date: 1 }, { unique: true });
 const Attendance = mongoose.model('Attendance', attendanceSchema);
 
 const AttendanceModel = {
+  normalize: (doc) => {
+    if (!doc) return null;
+    const status = typeof doc.status === 'string' ? doc.status.toLowerCase() : doc.status;
+    return {
+      ...doc,
+      id: doc._id,
+      employee_id: doc.employee,
+      employeeId: doc.employee,
+      status,
+      status_label: status && status.charAt(0).toUpperCase() + status.slice(1),
+      present: status === 'present',
+    };
+  },
+
   findByEmployeeAndDate: async (employeeId, date) => {
     const dateStr = typeof date === 'string' ? date : date.toISOString().split('T')[0];
     const start = new Date(dateStr + 'T00:00:00');
@@ -22,7 +36,7 @@ const AttendanceModel = {
       employee: employeeId,
       date: { $gte: start, $lte: end }
     }).lean();
-    return doc ? { ...doc, employee_id: doc.employee, id: doc._id } : null;
+    return AttendanceModel.normalize(doc);
   },
 
   findByEmployee: async (employeeId, startDate, endDate) => {
@@ -30,7 +44,7 @@ const AttendanceModel = {
       employee: employeeId,
       date: { $gte: new Date(startDate), $lte: new Date(endDate) }
     }).sort({ date: -1 }).lean();
-    return docs.map(d => ({ ...d, employee_id: d.employee, id: d._id }));
+    return docs.map((d) => AttendanceModel.normalize(d));
   },
 
   findByDepartment: async (departmentId, startDate, endDate) => {
