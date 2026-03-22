@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const Employee = require('../models/Employee');
 const User = require('../models/User');
+const { sendSuccess, sendError } = require('../utils/apiResponse');
 
 exports.getAll = async (req, res) => {
   try {
@@ -8,9 +9,9 @@ exports.getAll = async (req, res) => {
     const filters = { department_id, status, search, limit, offset: (page - 1) * limit };
     const employees = await Employee.findAll(filters);
     const total = await Employee.count({ department_id, status, search });
-    res.json({ data: employees, total, page: parseInt(page), limit: parseInt(limit) });
+    sendSuccess(res, { employees, total, page: parseInt(page), limit: parseInt(limit) });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };
 
@@ -18,11 +19,11 @@ exports.getById = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
     if (!employee) {
-      return res.status(404).json({ message: 'Employee not found' });
+      return sendError(res, 404, 'Employee not found');
     }
-    res.json(employee);
+    sendSuccess(res, employee);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };
 
@@ -30,11 +31,11 @@ exports.getProfile = async (req, res) => {
   try {
     const employee = await Employee.findByUserId(req.user.id);
     if (!employee) {
-      return res.status(404).json({ message: 'Employee profile not found' });
+      return sendError(res, 404, 'Employee profile not found');
     }
-    res.json(employee);
+    sendSuccess(res, employee);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };
 
@@ -42,12 +43,12 @@ exports.create = async (req, res) => {
   try {
     const existing = await Employee.findByEmployeeCode(req.body.employee_code);
     if (existing) {
-      return res.status(400).json({ message: 'Employee code already exists' });
+      return sendError(res, 400, 'Employee code already exists');
     }
 
     const existingEmail = await Employee.findOne({ email: req.body.email });
     if (existingEmail) {
-      return res.status(400).json({ message: 'Email already exists' });
+      return sendError(res, 400, 'Email already exists');
     }
 
     let userId = null;
@@ -70,9 +71,9 @@ exports.create = async (req, res) => {
 
     const id = await Employee.create(employeeData);
     const employee = await Employee.findById(id);
-    res.status(201).json(employee);
+    return sendSuccess(res, { employee }, 201);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };
 
@@ -80,7 +81,7 @@ exports.update = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
     if (!employee) {
-      return res.status(404).json({ message: 'Employee not found' });
+      return sendError(res, 404, 'Employee not found');
     }
 
     const updateData = { ...req.body };
@@ -90,9 +91,9 @@ exports.update = async (req, res) => {
 
     await Employee.update(req.params.id, updateData);
     const updated = await Employee.findById(req.params.id);
-    res.json(updated);
+    sendSuccess(res, updated);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };
 
@@ -100,11 +101,11 @@ exports.delete = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
     if (!employee) {
-      return res.status(404).json({ message: 'Employee not found' });
+      return sendError(res, 404, 'Employee not found');
     }
     await Employee.delete(req.params.id);
-    res.json({ message: 'Employee deleted successfully' });
+    sendSuccess(res, { message: 'Employee deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };

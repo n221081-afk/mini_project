@@ -21,8 +21,7 @@ export default function EmployeesPage() {
   useEffect(() => {
     getDepartments()
       .then((res) => {
-        const list = Array.isArray(res.data) ? res.data : res.data?.data;
-        if (list?.length) setDepartments(list);
+        setDepartments(res || []);
       })
       .catch(() => {});
   }, []);
@@ -35,8 +34,8 @@ export default function EmployeesPage() {
         if (search) params.search = search;
         if (deptFilter) params.department_id = deptFilter;
         const res = await getAll(params);
-        setData(res.data?.data || []);
-        setTotal(res.data?.total || 0);
+        setData(res.employees || []);
+        setTotal(res.total || 0);
       } catch {
         const filtered = employees.filter((e) => {
           const matchSearch = !search || `${e.first_name} ${e.last_name} ${e.email}`.toLowerCase().includes(search.toLowerCase());
