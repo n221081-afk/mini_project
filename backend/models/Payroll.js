@@ -30,49 +30,18 @@ const PayrollModel = {
     if (filters.offset) q = q.skip(parseInt(filters.offset));
 
     const docs = await q.lean();
-    return docs.map((d) => ({
-      ...d,
-      id: d._id,
-      employee_id: d.employee?._id,
-      employeeId: d.employee?._id,
-      first_name: d.employee?.first_name,
-      last_name: d.employee?.last_name,
-      employee_code: d.employee?.employee_code,
-      email: d.employee?.email,
-      salary: d.net_salary,
-      netSalary: d.net_salary,
-    }));
+    return docs.map(d => ({ ...d, employee_id: d.employee?._id, first_name: d.employee?.first_name, last_name: d.employee?.last_name, employee_code: d.employee?.employee_code, email: d.employee?.email }));
   },
 
   findByEmployeeAndMonth: async (employeeId, month) => {
     const doc = await Payroll.findOne({ employee: employeeId, month }).lean();
-    if (!doc) return null;
-    return {
-      ...doc,
-      id: doc._id,
-      employee_id: doc.employee,
-      employeeId: doc.employee,
-      salary: doc.net_salary,
-      netSalary: doc.net_salary,
-    };
+    return doc ? { ...doc, employee_id: doc.employee } : null;
   },
 
   findById: async (id) => {
     const doc = await Payroll.findById(id).populate('employee', 'first_name last_name employee_code email designation').lean();
     if (!doc) return null;
-    return {
-      ...doc,
-      id: doc._id,
-      employee_id: doc.employee?._id,
-      employeeId: doc.employee?._id,
-      first_name: doc.employee?.first_name,
-      last_name: doc.employee?.last_name,
-      employee_code: doc.employee?.employee_code,
-      email: doc.employee?.email,
-      designation: doc.employee?.designation,
-      salary: doc.net_salary,
-      netSalary: doc.net_salary,
-    };
+    return { ...doc, employee_id: doc.employee?._id, first_name: doc.employee?.first_name, last_name: doc.employee?.last_name, employee_code: doc.employee?.employee_code, email: doc.employee?.email, designation: doc.employee?.designation };
   },
 
   create: async (data) => {

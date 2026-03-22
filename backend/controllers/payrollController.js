@@ -3,7 +3,6 @@ const Payroll = require('../models/Payroll');
 const Employee = require('../models/Employee');
 const { calculateNetSalary } = require('../utils/payrollCalculator');
 const { generatePayslipPDF } = require('../utils/pdfGenerator');
-const { sendSuccess, sendError } = require('../utils/apiResponse');
 
 exports.getAll = async (req, res) => {
   try {
@@ -13,9 +12,9 @@ exports.getAll = async (req, res) => {
       filters.employee_id = employee.id || employee._id;
     }
     const payroll = await Payroll.findAll(filters);
-    sendSuccess(res, payroll);
+    res.json(payroll);
   } catch (error) {
-    sendError(res, 500, 'Server error', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -23,15 +22,15 @@ exports.getById = async (req, res) => {
   try {
     const payroll = await Payroll.findById(req.params.id);
     if (!payroll) {
-      return sendError(res, 404, 'Payroll record not found');
+      return res.status(404).json({ message: 'Payroll record not found' });
     }
     const employee = await Employee.findByUserId(req.user.id);
     if (req.user.role === 'employee' && employee && payroll.employee_id?.toString() !== (employee.id || employee._id)?.toString()) {
-      return sendError(res, 403, 'Access denied');
+      return res.status(403).json({ message: 'Access denied' });
     }
-    sendSuccess(res, payroll);
+    res.json(payroll);
   } catch (error) {
-    sendError(res, 500, 'Server error', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -64,9 +63,10 @@ exports.generateMonthly = async (req, res) => {
     }
 
     const payroll = await Payroll.findAll({ month: payrollMonth });
-    sendSuccess(res, { message: 'Payroll generated', data: payroll });
+    res.json({ message: 'Payroll generated', data: payroll });
   } catch (error) {
-    sendError(res, 500, error.message, error);
+    console.error("GENERATE PAYROLL ERROR:", error);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -74,11 +74,11 @@ exports.downloadPayslip = async (req, res) => {
   try {
     const payroll = await Payroll.findById(req.params.id);
     if (!payroll) {
-      return sendError(res, 404, 'Payroll record not found');
+      return res.status(404).json({ message: 'Payroll record not found' });
     }
     const employee = await Employee.findByUserId(req.user.id);
     if (req.user.role === 'employee' && employee && payroll.employee_id?.toString() !== (employee.id || employee._id)?.toString()) {
-      return sendError(res, 403, 'Access denied');
+      return res.status(403).json({ message: 'Access denied' });
     }
 
     const payslipData = {
@@ -101,6 +101,6 @@ exports.downloadPayslip = async (req, res) => {
     res.send(pdfBuffer);
   } catch (error) {
     console.error("PAYSLIP ERROR:", error);
-    sendError(res, 500, error.message, error);
+    res.status(500).json({ message: error.message});
   }
 };
