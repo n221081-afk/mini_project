@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
 const Employee = require('../models/Employee');
+const { sendSuccess, sendError } = require('../utils/apiResponse');
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -16,23 +17,23 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+      return sendError(res, 400, 'Email and password are required');
     }
 
     const user = await User.findByEmail(email);
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return sendError(res, 401, 'Invalid credentials');
     }
 
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return sendError(res, 401, 'Invalid credentials');
     }
 
     const token = generateToken(user);
     const employee = await Employee.findByUserId(user._id || user.id);
     
-    res.json({
+    sendSuccess(res, {
       token,
       user: {
         id: user._id || user.id,
@@ -43,24 +44,24 @@ exports.login = async (req, res) => {
       employee: employee ? { id: employee.id, employee_code: employee.employee_code } : null
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };
 
 exports.logout = async (req, res) => {
-  res.json({ message: 'Logged out successfully' });
+  sendSuccess(res, { message: 'Logged out successfully' });
 };
 
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
+      return sendError(res, 400, 'Email is required');
     }
 
     const user = await User.findByEmail(email);
     if (!user) {
-      return res.json({ message: 'If the email exists, a reset link will be sent' });
+      return sendSuccess(res, { message: 'If the email exists, a reset link will be sent' });
     }
 
     const token = crypto.randomBytes(32).toString('hex');
@@ -68,12 +69,12 @@ exports.forgotPassword = async (req, res) => {
     await User.savePasswordResetToken(user._id || user.id, token, expiresAt);
 
     // In production: send email with reset link
-    res.json({ 
+    sendSuccess(res, { 
       message: 'If the email exists, a reset link will be sent',
       resetToken: process.env.NODE_ENV === 'development' ? token : undefined
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };
 
@@ -81,20 +82,20 @@ exports.resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
     if (!token || !newPassword) {
-      return res.status(400).json({ message: 'Token and new password are required' });
+      return sendError(res, 400, 'Token and new password are required');
     }
 
     const resetRecord = await User.findValidResetToken(token);
     if (!resetRecord) {
-      return res.status(400).json({ message: 'Invalid or expired reset token' });
+      return sendError(res, 400, 'Invalid or expired reset token');
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await User.update(resetRecord.user || resetRecord.user_id, { password: hashedPassword });
     await User.invalidateResetToken(token);
 
-    res.json({ message: 'Password reset successfully' });
+    sendSuccess(res, { message: 'Password reset successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };

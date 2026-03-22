@@ -1,11 +1,12 @@
 const Department = require('../models/Department');
+const { sendSuccess, sendError } = require('../utils/apiResponse');
 
 exports.getAll = async (req, res) => {
   try {
     const departments = await Department.findAll();
-    res.json(departments);
+    sendSuccess(res, departments);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };
 
@@ -13,11 +14,11 @@ exports.getById = async (req, res) => {
   try {
     const department = await Department.findById(req.params.id);
     if (!department) {
-      return res.status(404).json({ message: 'Department not found' });
+      return sendError(res, 404, 'Department not found');
     }
-    res.json(department);
+    sendSuccess(res, department);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };
 
@@ -25,11 +26,11 @@ exports.getWithEmployees = async (req, res) => {
   try {
     const department = await Department.findWithEmployees(req.params.id);
     if (!department) {
-      return res.status(404).json({ message: 'Department not found' });
+      return sendError(res, 404, 'Department not found');
     }
-    res.json(department);
+    sendSuccess(res, department);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };
 
@@ -37,9 +38,9 @@ exports.create = async (req, res) => {
   try {
     const id = await Department.create(req.body);
     const department = await Department.findById(id);
-    res.status(201).json(department);
+    sendSuccess(res, department, 201);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };
 
@@ -47,13 +48,13 @@ exports.update = async (req, res) => {
   try {
     const department = await Department.findById(req.params.id);
     if (!department) {
-      return res.status(404).json({ message: 'Department not found' });
+      return sendError(res, 404, 'Department not found');
     }
     await Department.update(req.params.id, req.body);
     const updated = await Department.findById(req.params.id);
-    res.json(updated);
+    sendSuccess(res, updated);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };
 
@@ -61,11 +62,11 @@ exports.delete = async (req, res) => {
   try {
     const department = await Department.findById(req.params.id);
     if (!department) {
-      return res.status(404).json({ message: 'Department not found' });
+      return sendError(res, 404, 'Department not found');
     }
     await Department.delete(req.params.id);
-    res.json({ message: 'Department deleted successfully' });
+    sendSuccess(res, { message: 'Department deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    sendError(res, 500, 'Server error', error);
   }
 };
