@@ -2,7 +2,7 @@ import api from './api';
 
 export const login = async (email, password) => {
   const { data } = await api.post('/auth/login', { email, password });
-  return data.data;
+  return data;
 };
 
 export const logout = async () => {
@@ -16,5 +16,5 @@ export const logout = async () => {
 
 export const forgotPassword = async (email) => {
   const { data } = await api.post('/auth/forgot-password', { email });
-  return data.data;
+  return data;
 };

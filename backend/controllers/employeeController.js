@@ -1,7 +1,6 @@
 const bcrypt = require('bcryptjs');
 const Employee = require('../models/Employee');
 const User = require('../models/User');
-const { sendSuccess, sendError } = require('../utils/apiResponse');
 
 exports.getAll = async (req, res) => {
   try {
@@ -9,9 +8,9 @@ exports.getAll = async (req, res) => {
     const filters = { department_id, status, search, limit, offset: (page - 1) * limit };
     const employees = await Employee.findAll(filters);
     const total = await Employee.count({ department_id, status, search });
-    sendSuccess(res, { employees, total, page: parseInt(page), limit: parseInt(limit) });
+    res.json({ data: employees, total, page: parseInt(page), limit: parseInt(limit) });
   } catch (error) {
-    sendError(res, 500, 'Server error', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -19,11 +18,11 @@ exports.getById = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
     if (!employee) {
-      return sendError(res, 404, 'Employee not found');
+      return res.status(404).json({ message: 'Employee not found' });
     }
-    sendSuccess(res, employee);
+    res.json(employee);
   } catch (error) {
-    sendError(res, 500, 'Server error', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -31,11 +30,11 @@ exports.getProfile = async (req, res) => {
   try {
     const employee = await Employee.findByUserId(req.user.id);
     if (!employee) {
-      return sendError(res, 404, 'Employee profile not found');
+      return res.status(404).json({ message: 'Employee profile not found' });
     }
-    sendSuccess(res, employee);
+    res.json(employee);
   } catch (error) {
-    sendError(res, 500, 'Server error', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -43,12 +42,12 @@ exports.create = async (req, res) => {
   try {
     const existing = await Employee.findByEmployeeCode(req.body.employee_code);
     if (existing) {
-      return sendError(res, 400, 'Employee code already exists');
+      return res.status(400).json({ message: 'Employee code already exists' });
     }
 
     const existingEmail = await Employee.findOne({ email: req.body.email });
     if (existingEmail) {
-      return sendError(res, 400, 'Email already exists');
+      return res.status(400).json({ message: 'Email already exists' });
     }
 
     let userId = null;
@@ -71,9 +70,9 @@ exports.create = async (req, res) => {
 
     const id = await Employee.create(employeeData);
     const employee = await Employee.findById(id);
-    return sendSuccess(res, { employee }, 201);
+    res.status(201).json(employee);
   } catch (error) {
-    sendError(res, 500, 'Server error', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -81,7 +80,7 @@ exports.update = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
     if (!employee) {
-      return sendError(res, 404, 'Employee not found');
+      return res.status(404).json({ message: 'Employee not found' });
     }
 
     const updateData = { ...req.body };
@@ -91,9 +90,9 @@ exports.update = async (req, res) => {
 
     await Employee.update(req.params.id, updateData);
     const updated = await Employee.findById(req.params.id);
-    sendSuccess(res, updated);
+    res.json(updated);
   } catch (error) {
-    sendError(res, 500, 'Server error', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -101,11 +100,11 @@ exports.delete = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
     if (!employee) {
-      return sendError(res, 404, 'Employee not found');
+      return res.status(404).json({ message: 'Employee not found' });
     }
     await Employee.delete(req.params.id);
-    sendSuccess(res, { message: 'Employee deleted successfully' });
+    res.json({ message: 'Employee deleted successfully' });
   } catch (error) {
-    sendError(res, 500, 'Server error', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
