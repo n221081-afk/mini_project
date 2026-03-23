@@ -1,7 +1,9 @@
+```javascript
 import { useState, useEffect } from 'react';
-import { getAll, updateStage } from '../services/recruitmentService';
+import { getAll, create, updateStage } from '../services/recruitmentService';
 import { recruitmentJobs } from '../data/dummyData';
 import Table from '../components/Table';
+import Modal from '../components/Modal';
 
 const STAGES = ['application_received', 'interview_scheduled', 'selected', 'rejected'];
 
