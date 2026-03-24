@@ -53,7 +53,7 @@ export default function LoginPage() {
             <div className="banner-pill justify-center">
               <span className="text-lg">🇮🇳</span>            </div>
             <h1 className="text-3xl md:text-4xl font-bold text-dark leading-tight">
-              JAGGU's EMPIRE
+              CoreHR Solutions
               <br />
                           </h1>
           
@@ -95,13 +95,7 @@ export default function LoginPage() {
               >
                 {loading ? 'Signing in...' : 'Login'}
               </button>
-              <button
-                type="button"
-                className="w-full btn-secondary py-3.5"
-                onClick={() => {}}
-              >
-                Book a Demo →
-              </button>
+            
             </form>
           </div>
         </div>
