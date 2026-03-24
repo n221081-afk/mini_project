@@ -1,22 +1,24 @@
-import { useState } from 'react';
+import { useState, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import Breadcrumbs from './components/Breadcrumbs';
-import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
-import EmployeesPage from './pages/EmployeesPage';
-import AddEmployeePage from './pages/AddEmployeePage';
-import EmployeeProfilePage from './pages/EmployeeProfilePage';
-import DepartmentsPage from './pages/DepartmentsPage';
-import AttendancePage from './pages/AttendancePage';
-import LeavePage from './pages/LeavePage';
-import PayrollPage from './pages/PayrollPage';
-import RecruitmentPage from './pages/RecruitmentPage';
-import PerformancePage from './pages/PerformancePage';
-import ReportsPage from './pages/ReportsPage';
-import SettingsPage from './pages/SettingsPage';
+import { Toaster } from 'react-hot-toast';
+
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const EmployeesPage = lazy(() => import('./pages/EmployeesPage'));
+const AddEmployeePage = lazy(() => import('./pages/AddEmployeePage'));
+const EmployeeProfilePage = lazy(() => import('./pages/EmployeeProfilePage'));
+const DepartmentsPage = lazy(() => import('./pages/DepartmentsPage'));
+const AttendancePage = lazy(() => import('./pages/AttendancePage'));
+const LeavePage = lazy(() => import('./pages/LeavePage'));
+const PayrollPage = lazy(() => import('./pages/PayrollPage'));
+const RecruitmentPage = lazy(() => import('./pages/RecruitmentPage'));
+const PerformancePage = lazy(() => import('./pages/PerformancePage'));
+const ReportsPage = lazy(() => import('./pages/ReportsPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 const normalizeRole = (role) => (role === 'hr_manager' ? 'hr' : role);
 
@@ -34,14 +36,17 @@ function PrivateRoute({ children, allowedRoles }) {
 function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
-    <div className="flex min-h-screen" style={{ background: 'linear-gradient(180deg, rgba(209, 250, 229, 0.15) 0%, rgba(249, 250, 251, 1) 30%)' }}>
+    <div className="flex min-h-screen bg-gray-50 dark:bg-[#111827] text-gray-900 dark:text-gray-100 transition-colors duration-200">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar onMenuClick={() => setSidebarOpen(true)} />
+        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
         <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto">
           <div className="max-w-7xl mx-auto">
             <Breadcrumbs />
-            {children}
+            <Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div></div>}>
+              {children}
+            </Suspense>
           </div>
         </main>
       </div>
@@ -54,7 +59,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/login" element={<Suspense fallback={<div>Loading...</div>}><LoginPage /></Suspense>} />
           <Route
             path="/"
             element={

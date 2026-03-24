@@ -1,0 +1,1 @@
+import{a}from"./api-BoIErQAa.js";const p=e=>a.get("/leaves",{params:e}),o=()=>a.get("/leaves/stats"),l=e=>a.post("/leaves/apply",e),c=e=>a.put(`/leaves/${e}/approve`),r=(e,s)=>a.put(`/leaves/${e}/reject`,{reason:s});export{c as a,l as b,o as c,p as g,r};

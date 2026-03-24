@@ -8,15 +8,15 @@ export default function DashboardCards({ cards }) {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500">{card.title}</p>
-              <p className="text-2xl font-bold text-dark mt-1">{card.value}</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{card.title}</p>
+              <p className="text-2xl font-bold text-dark dark:text-white mt-1">{card.value}</p>
               {card.subtitle && (
-                <p className="text-xs text-gray-400 mt-1">{card.subtitle}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{card.subtitle}</p>
               )}
             </div>
             {card.icon && (
-              <div className={`p-3 rounded-lg ${card.iconBg || 'bg-primary-100'}`}>
-                <span className="text-2xl">{card.icon}</span>
+              <div className={`p-3 rounded-xl ${card.iconBg || 'bg-primary-50 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400'}`}>
+                <span className="text-2xl drop-shadow-sm">{card.icon}</span>
               </div>
             )}
           </div>

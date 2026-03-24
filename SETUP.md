@@ -34,7 +34,7 @@
    ```bash
    npm run seed
    ```
-   This creates an admin user: **admin@enterprisehr.com** / **password123**.
+   This creates an admin user: **sdchandu213@gmail.com** / **password123**.
 
 6. **Run the backend**
    ```bash
@@ -92,7 +92,7 @@
 
 3. **Login**
    - Open http://localhost:3000
-   - Use **admin@enterprisehr.com** / **password123** (after running seed)
+   - Use **sdchandu213@gmail.com** (admin) or **jagadeeshgokarla67@gmail.com** (HR) / **password123** (after running seed)
    - Or use the demo fallback on the login page if the API is unreachable.
 
 ---

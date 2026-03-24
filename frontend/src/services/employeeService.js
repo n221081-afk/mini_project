@@ -27,3 +27,4 @@ export const remove = (id) => api.delete(`/employees/${id}`);
 export const applySalaryHike = (id, hikeAmount) =>
   api.put(`/employees/${id}/salary-hike`, { hike_amount: hikeAmount });
 export const terminateEmployee = (id) => api.put(`/employees/${id}/terminate`);
+export const contactHR = (data) => api.post('/employees/contact-hr', data);

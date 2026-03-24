@@ -134,24 +134,44 @@ export default function EmployeesPage() {
       </div>
       {error && <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>}
       {success && <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm">{success}</div>}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <input
-          type="search"
-          placeholder="Search employees..."
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="input-field max-w-xs"
-        />
-        <select
-          value={deptFilter}
-          onChange={(e) => { setDeptFilter(e.target.value); setPage(1); }}
-          className="input-field max-w-xs"
-        >
-          <option value="">All Departments</option>
-          {departments.map((d) => (
-            <option key={d.id} value={d.id}>{d.name}</option>
-          ))}
-        </select>
+      <div className="card p-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="relative flex-1 w-full sm:max-w-md">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="search"
+              placeholder="Search employees by name, email..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              className="input-field pl-10 w-full"
+            />
+          </div>
+          <div className="relative w-full sm:w-auto min-w-[200px]">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            <select
+              value={deptFilter}
+              onChange={(e) => { setDeptFilter(e.target.value); setPage(1); }}
+              className="input-field pl-10 w-full appearance-none"
+            >
+              <option value="">All Departments</option>
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </select>
+          </div>
+          {(search || deptFilter) && (
+            <button
+              onClick={() => { setSearch(''); setDeptFilter(''); setPage(1); }}
+              className="text-sm font-medium text-red-500 hover:text-red-700 transition flex items-center gap-1 mt-2 sm:mt-0"
+            >
+              Clear Filters
+            </button>
+          )}
+        </div>
       </div>
       <div className="card overflow-hidden">
         {loading ? (

@@ -24,5 +24,6 @@ router.put('/:id', authMiddleware, roleMiddleware('admin', 'hr', 'hr_manager'), 
 router.put('/:id/salary-hike', authMiddleware, roleMiddleware('admin', 'hr', 'hr_manager'), employeeController.applySalaryHike);
 router.put('/:id/terminate', authMiddleware, roleMiddleware('admin'), employeeController.terminateEmployee);
 router.delete('/:id', authMiddleware, roleMiddleware('admin'), employeeController.delete);
+router.post('/contact-hr', authMiddleware, employeeController.contactHR);
 
 module.exports = router;
