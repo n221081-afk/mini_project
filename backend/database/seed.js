@@ -1,44 +1,65 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const connectDB = require('../config/db');
+require('../config/db');
 
-const User = require('../models/User');
-const Department = require('../models/Department');
-const Employee = require('../models/Employee');
-const Attendance = require('../models/Attendance');
-const Leave = require('../models/Leave');
-const Payroll = require('../models/Payroll');
-const Recruitment = require('../models/Recruitment');
-const Performance = require('../models/Performance');
+// Require models to register schemas
+require('../models/User');
+require('../models/Department');
+require('../models/Employee');
+require('../models/Attendance');
+require('../models/Leave');
+require('../models/Payroll');
+require('../models/Recruitment');
+require('../models/Performance');
 
-const DeptModel = mongoose.model('Department');
-const EmpModel = mongoose.model('Employee');
-const RecruitmentModel = mongoose.model('Recruitment');
+const User = mongoose.model('User');
+const Department = mongoose.model('Department');
+const Employee = mongoose.model('Employee');
+const Attendance = mongoose.model('Attendance');
+const Leave = mongoose.model('Leave');
+const Payroll = mongoose.model('Payroll');
+const Recruitment = mongoose.model('Recruitment');
+const Performance = mongoose.model('Performance');
 
-const departments = ['Engineering', 'HR', 'Finance', 'Marketing', 'Operations'];
+const departments = [
+  { name: 'Engineering', code: 'ENG' },
+  { name: 'HR', code: 'HR' },
+  { name: 'Finance', code: 'FIN' },
+  { name: 'Marketing', code: 'MKT' },
+  { name: 'Operations', code: 'OPS' }
+];
 const firstNames = ['John', 'Jane', 'Robert', 'Emily', 'Michael', 'Sarah', 'David', 'Lisa', 'James', 'Maria', 'William', 'Jennifer', 'Richard', 'Linda', 'Thomas', 'Patricia'];
 const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Wilson', 'Anderson', 'Taylor'];
 const designations = ['Software Engineer', 'Senior Developer', 'HR Manager', 'Accountant', 'Marketing Executive', 'Operations Manager', 'Team Lead', 'Analyst'];
 
 async function seed() {
   try {
-    await connectDB();
+    // Clear existing data
+    await Department.deleteMany();
+    await Employee.deleteMany();
+    await User.deleteMany();
+    await Attendance.deleteMany();
+    await Leave.deleteMany();
+    await Payroll.deleteMany();
+    await Recruitment.deleteMany();
+    await Performance.deleteMany();
+
     const hashedPassword = await bcrypt.hash('password123', 10);
 
-    let adminUser = await User.findByEmail('admin@enterprisehr.com');
-    if (!adminUser) await User.create({ name: 'Admin User', email: 'admin@enterprisehr.com', password: hashedPassword, role: 'admin' });
+    let adminUser = await User.findByEmail('sdchandu213@gmail.com');
+    if (!adminUser) await User.create({ name: 'Admin User', email: 'sdchandu213@gmail.com', password: hashedPassword, role: 'admin' });
     else await User.update(adminUser._id, { password: hashedPassword });
-    adminUser = await User.findByEmail('admin@enterprisehr.com');
+    adminUser = await User.findByEmail('sdchandu213@gmail.com');
 
-    let hrUser = await User.findByEmail('hr@enterprisehr.com');
-    if (!hrUser) await User.create({ name: 'HR Manager', email: 'hr@enterprisehr.com', password: hashedPassword, role: 'hr_manager' });
+    let hrUser = await User.findByEmail('jagadeeshgokarla67@gmail.com');
+    if (!hrUser) await User.create({ name: 'HR Manager', email: 'jagadeeshgokarla67@gmail.com', password: hashedPassword, role: 'hr_manager' });
     else await User.update(hrUser._id, { password: hashedPassword });
 
     const deptIds = [];
-    for (const name of departments) {
-      let dept = await DeptModel.findOne({ name });
-      if (!dept) dept = await DeptModel.create({ name, description: `${name} department` });
+    for (const deptData of departments) {
+      let dept = await Department.findOne({ name: deptData.name });
+      if (!dept) dept = await Department.create({ name: deptData.name, code: deptData.code });
       deptIds.push(dept._id);
     }
 
@@ -53,9 +74,9 @@ async function seed() {
       } else {
         user = { _id: user._id || user.id };
       }
-      const exists = await EmpModel.findOne({ email });
+      const exists = await Employee.findOne({ email });
       if (!exists) {
-        await EmpModel.create({
+        await Employee.create({
           user: user._id,
           employee_code: `EMP${String(i).padStart(4, '0')}`,
           first_name: fn,
@@ -71,7 +92,7 @@ async function seed() {
       }
     }
 
-    const employees = await EmpModel.find({ status: 'active' }).select('_id').limit(30).lean();
+    const employees = await Employee.find({ status: 'active' }).select('_id').limit(30).lean();
     const empIds = employees.map(e => e._id);
 
     for (const empId of empIds.slice(0, 25)) {
@@ -82,13 +103,26 @@ async function seed() {
           const date = new Date(baseDate.getFullYear(), baseDate.getMonth(), d);
           if (date.getDay() !== 0 && date.getDay() !== 6) {
             const dateStr = date.toISOString().split('T')[0];
-            await Attendance.upsert(empId, dateStr, { status: 'present', clock_in: '09:00:00', clock_out: '18:00:00' });
+            const startOfDay = new Date(dateStr + 'T00:00:00');
+            await Attendance.findOneAndUpdate(
+              { employee: empId, date: { $gte: startOfDay, $lte: new Date(dateStr + 'T23:59:59.999') } },
+              {
+                $set: {
+                  employee: empId,
+                  date: startOfDay,
+                  status: 'present',
+                  clock_in: '09:00:00',
+                  clock_out: '18:00:00'
+                }
+              },
+              { upsert: true }
+            );
           }
         }
       }
     }
 
-    const empList = await EmpModel.find({ status: 'active' }).select('_id salary').lean();
+    const empList = await Employee.find({ status: 'active' }).select('_id salary').lean();
     for (const emp of empList) {
       for (const month of ['2025-01', '2025-02']) {
         const basic = emp.salary;
@@ -97,19 +131,25 @@ async function seed() {
         const pf = Math.round(basic * 0.12);
         const tax = gross > 500000 ? Math.round((gross - 500000) * 0.2) : 0;
         const net = gross - pf - tax;
-        await Payroll.upsert({
-          employee_id: emp._id,
-          month,
-          basic_salary: basic,
-          hra,
-          allowances: 0,
-          bonus: 0,
-          tax,
-          pf,
-          other_deductions: 0,
-          net_salary: net,
-          status: 'processed'
-        });
+        await Payroll.findOneAndUpdate(
+          { employee: emp._id, month },
+          {
+            $set: {
+              employee: emp._id,
+              month,
+              basic_salary: basic,
+              hra,
+              allowances: 0,
+              bonus: 0,
+              tax,
+              pf,
+              other_deductions: 0,
+              net_salary: net,
+              status: 'processed'
+            }
+          },
+          { upsert: true }
+        );
       }
     }
 
@@ -130,7 +170,7 @@ async function seed() {
 
     const jobs = ['Software Engineer', 'HR Associate', 'Financial Analyst'];
     for (let i = 0; i < 5; i++) {
-      await RecruitmentModel.create({
+      await Recruitment.create({
         job_title: jobs[i % 3],
         candidate_name: `Candidate ${i + 1}`,
         candidate_email: `candidate${i + 1}@email.com`,
@@ -149,7 +189,7 @@ async function seed() {
     }
 
     console.log('Seed completed successfully!');
-    console.log('Login: admin@enterprisehr.com / hr@enterprisehr.com / emp1@enterprisehr.com - password: password123');
+    console.log('Login: sdchandu213@gmail.com / jagadeeshgokarla67@gmail.com / emp1@enterprisehr.com - password: password123');
     process.exit(0);
   } catch (error) {
     console.error('Seed failed:', error);

@@ -1,6 +1,16 @@
 const Leave = require('../models/Leave');
 const Employee = require('../models/Employee');
 const hasManagerAccess = (role) => ['admin', 'hr', 'hr_manager'].includes(role);
+const mongoose = require('mongoose');
+const { sendEmail } = require('../utils/emailService');
+const { newLeaveRequestEmail, leaveStatusUpdateEmail } = require('../utils/emailTemplates');
+const COMPANY_NAME = process.env.COMPANY_NAME || 'EnterpriseHR';
+
+async function getAdminHrEmails() {
+  const User = mongoose.model('User');
+  const users = await User.find({ role: { $in: ['admin', 'hr', 'hr_manager'] } }).select('email').lean();
+  return users.map((u) => u.email).filter(Boolean);
+}
 
 exports.getAll = async (req, res) => {
   try {
@@ -60,6 +70,28 @@ exports.apply = async (req, res) => {
 
     const id = await Leave.create(leaveData);
     const leave = await Leave.findById(id);
+
+    // Email notification to Admin/HR
+    try {
+      const to = await getAdminHrEmails();
+      if (to.length) {
+        await sendEmail({
+          to,
+          subject: 'New Leave Request Submitted',
+          html: newLeaveRequestEmail({
+            companyName: COMPANY_NAME,
+            employeeName: `${leave.first_name || ''} ${leave.last_name || ''}`.trim(),
+            startDate: new Date(leave.start_date).toLocaleDateString(),
+            endDate: new Date(leave.end_date).toLocaleDateString(),
+            reason: leave.reason || '',
+          }),
+        });
+      }
+    } catch (e) {
+      // Don't fail core workflow if email fails
+      console.error('Leave apply email failed:', e.message || e);
+    }
+
     res.status(201).json({ success: true, message: 'Leave applied successfully', data: leave });
   } catch (error) {
     console.error(error);
@@ -78,6 +110,26 @@ exports.approve = async (req, res) => {
     }
     await Leave.update(req.params.id, { status: 'approved', approved_by: req.user.id });
     const updated = await Leave.findById(req.params.id);
+
+    // Email notification to Employee
+    try {
+      if (updated?.email) {
+        await sendEmail({
+          to: updated.email,
+          subject: 'Leave Request Status Update',
+          html: leaveStatusUpdateEmail({
+            companyName: COMPANY_NAME,
+            employeeName: `${updated.first_name || ''} ${updated.last_name || ''}`.trim() || 'Employee',
+            status: 'approved',
+            startDate: new Date(updated.start_date).toLocaleDateString(),
+            endDate: new Date(updated.end_date).toLocaleDateString(),
+          }),
+        });
+      }
+    } catch (e) {
+      console.error('Leave approve email failed:', e.message || e);
+    }
+
     res.json({ success: true, message: 'Leave approved', data: updated });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
@@ -95,6 +147,26 @@ exports.reject = async (req, res) => {
     }
     await Leave.update(req.params.id, { status: 'rejected', approved_by: req.user.id });
     const updated = await Leave.findById(req.params.id);
+
+    // Email notification to Employee
+    try {
+      if (updated?.email) {
+        await sendEmail({
+          to: updated.email,
+          subject: 'Leave Request Status Update',
+          html: leaveStatusUpdateEmail({
+            companyName: COMPANY_NAME,
+            employeeName: `${updated.first_name || ''} ${updated.last_name || ''}`.trim() || 'Employee',
+            status: 'rejected',
+            startDate: new Date(updated.start_date).toLocaleDateString(),
+            endDate: new Date(updated.end_date).toLocaleDateString(),
+          }),
+        });
+      }
+    } catch (e) {
+      console.error('Leave reject email failed:', e.message || e);
+    }
+
     res.json({ success: true, message: 'Leave rejected', data: updated });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });

@@ -3,6 +3,7 @@ import { getAll, apply, approve, reject, getStats } from '../services/leaveServi
 import Table from '../components/Table';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
+import toast from 'react-hot-toast';
 
 const LEAVE_TYPES = { sick_leave: 'Sick', casual_leave: 'Casual', paid_leave: 'Paid', work_from_home: 'WFH' };
 
@@ -60,10 +61,10 @@ export default function LeavePage() {
       await apply(form);
       setShowApply(false);
       setForm({ leave_type: 'casual_leave', start_date: '', end_date: '', reason: '' });
-      setSuccess('Leave request submitted successfully.');
+      toast.success('Leave request submitted');
       await loadLeaves();
     } catch (err) {
-      setError(err.response?.data?.message || 'Leave apply failed');
+      toast.error(err.response?.data?.message || 'Leave apply failed');
     } finally {
       setLoading(false);
     }
@@ -74,10 +75,10 @@ export default function LeavePage() {
     setSuccess('');
     try {
       await approve(id);
-      setSuccess('Leave approved.');
+      toast.success('Leave approved');
       await loadLeaves();
     } catch (err) {
-      setError(err.response?.data?.message || 'Approve failed');
+      toast.error(err.response?.data?.message || 'Approve failed');
     }
   };
 
@@ -86,10 +87,10 @@ export default function LeavePage() {
     setSuccess('');
     try {
       await reject(id);
-      setSuccess('Leave rejected.');
+      toast.success('Leave rejected');
       await loadLeaves();
     } catch (err) {
-      setError(err.response?.data?.message || 'Reject failed');
+      toast.error(err.response?.data?.message || 'Reject failed');
     }
   };
 

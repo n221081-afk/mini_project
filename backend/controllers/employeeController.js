@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const Employee = require('../models/Employee');
 const User = require('../models/User');
+const { sendEmail } = require('../utils/emailService');
+const { employeeToAdminEmail } = require('../utils/emailTemplates');
 
 exports.getAll = async (req, res) => {
   try {
@@ -139,5 +141,39 @@ exports.terminateEmployee = async (req, res) => {
     res.json({ success: true, message: 'Employee terminated', data: updated });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+exports.contactHR = async (req, res) => {
+  try {
+    const { subject, message, templateType } = req.body;
+    if (!subject || !message) {
+      return res.status(400).json({ success: false, message: 'Subject and message are required' });
+    }
+    
+    // Fetch employee details
+    const employee = await Employee.findByUserId(req.user.id);
+    if (!employee) {
+      return res.status(404).json({ success: false, message: 'Employee profile not found' });
+    }
+
+    const adminEmail = process.env.SMTP_USER; // Routing it back to the configured company email
+    
+    await sendEmail({
+      to: adminEmail,
+      subject: `[${templateType || 'HR Query'}] ${subject}`,
+      html: employeeToAdminEmail({
+        companyName: process.env.COMPANY_NAME,
+        employeeName: `${employee.first_name} ${employee.last_name}`,
+        employeeCode: employee.employee_code,
+        subject,
+        message
+      })
+    });
+
+    res.json({ success: true, message: 'Your message has been sent to HR successfully.' });
+  } catch (error) {
+    console.error('Email error:', error);
+    res.status(500).json({ success: false, message: 'Failed to send email' });
   }
 };

@@ -36,7 +36,7 @@ npm run seed
 
 Creates: 30 employees, 5 departments, 3 months attendance, 2 months payroll, sample leaves, recruitment candidates, performance reviews.
 
-**Login credentials:** admin@enterprisehr.com / hr@enterprisehr.com / emp1@enterprisehr.com - password: `password123`
+**Login credentials:** sdchandu213@gmail.com / jagadeeshgokarla67@gmail.com / emp1@enterprisehr.com - password: `password123`
 
 ### 4. Start Server
 

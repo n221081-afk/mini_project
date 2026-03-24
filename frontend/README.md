@@ -42,7 +42,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Use these credentials to explore the UI with dummy data:
 
-- **Email:** `admin@enterprisehr.com`
+- **Email:** `sdchandu213@gmail.com`
 - **Password:** `password123`
 
 ### 5. Build for production

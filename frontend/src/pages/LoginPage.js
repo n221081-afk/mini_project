@@ -73,7 +73,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="input-field"
-                  placeholder="admin@enterprisehr.com"
+                  placeholder="sdchandu213@gmail.com"
                   required
                 />
               </div>
@@ -103,6 +103,20 @@ export default function LoginPage() {
                 Book a Demo →
               </button>
             </form>
+            <p className="mt-5 text-center text-sm text-gray-500">
+              Demo: sdchandu213@gmail.com / password123
+            </p>
+          </div>
+
+          <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
+            <div className="flex items-center gap-1">
+              <span className="flex">★★★★★</span>
+              <span>4.8/5 on G2</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="flex">★★★★★</span>
+              <span>4.9/5 Capterra</span>
+            </div>
           </div>
         </div>
       </main>
