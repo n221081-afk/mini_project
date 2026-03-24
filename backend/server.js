@@ -53,9 +53,13 @@ app.use('/api/performance', performanceRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
-app.listen(PORT, () => {
-  console.log(`EnterpriseHR API running on port ${PORT}`);
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+  });
 });
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
 
@@ -63,4 +67,8 @@ app.use((err, req, res, next) => {
     success: false,
     message: err.message || "Internal Server Error"
   });
+});
+
+app.listen(PORT, () => {
+  console.log(`EnterpriseHR API running on port ${PORT}`);
 });

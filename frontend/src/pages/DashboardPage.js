@@ -1,21 +1,22 @@
 import { useState, useEffect } from 'react';
 import DashboardCards from '../components/DashboardCards';
-import Breadcrumbs from '../components/Breadcrumbs';
-import { BarChart, DoughnutChart, LineChart } from '../components/Charts';
+import { BarChart, DoughnutChart } from '../components/Charts';
 import {
   employees,
-  departments,
   attendanceRecords,
   leaveRequests,
   payrollRecords,
 } from '../data/dummyData';
 import api from '../services/api';
+import { departmentPayroll } from '../services/reportService';
+import Table from '../components/Table';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState(null);
   const [deptChartData, setDeptChartData] = useState(null);
   const [attendanceChartData, setAttendanceChartData] = useState(null);
   const [payrollChartData, setPayrollChartData] = useState(null);
+  const [deptPayrollRows, setDeptPayrollRows] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,28 +38,37 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchCharts = async () => {
       try {
-        const [deptRes, attRes, payrollRes] = await Promise.all([
+        const month = new Date().toISOString().slice(0, 7);
+        const [deptRes, attRes, deptPayrollRes] = await Promise.all([
           api.get('/reports/employees-by-department'),
-          api.get('/reports/monthly-attendance', { params: { month: new Date().toISOString().slice(0, 7) } }),
-          api.get('/reports/payroll-summary', { params: { month: new Date().toISOString().slice(0, 7) } }),
+          api.get('/reports/monthly-attendance', { params: { month } }),
+          departmentPayroll(month),
         ]);
-        const deptList = Array.isArray(deptRes.data) ? deptRes.data : [];
+        const deptList = Array.isArray(deptRes.data?.data) ? deptRes.data.data : [];
         setDeptChartData({
           labels: deptList.map((d) => d.department_name || d.name),
           datasets: [{ data: deptList.map((d) => d.employee_count || d.count || 0), backgroundColor: ['#10b981', '#059669', '#34d399', '#6ee7b7', '#047857'] }],
         });
-        const attList = Array.isArray(attRes.data) ? attRes.data : [];
+        const attList = Array.isArray(attRes.data?.data) ? attRes.data.data : [];
         const present = attList.reduce((s, r) => s + (r.present_days || 0), 0);
         const absent = attList.reduce((s, r) => s + (r.absent_days || 0), 0);
         setAttendanceChartData({
           labels: ['Present', 'Absent', 'Half Day', 'Leave'],
           datasets: [{ data: [present, absent, 0, 0], backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#6366f1'] }],
         });
-        const pr = payrollRes.data;
-        const totalNet = pr?.total_net ?? pr?.monthlyPayrollCost ?? 0;
+        const rows = Array.isArray(deptPayrollRes.data?.data) ? deptPayrollRes.data.data : [];
+        setDeptPayrollRows(rows);
         setPayrollChartData({
-          labels: [new Date().toISOString().slice(0, 7)],
-          datasets: [{ label: 'Total Payroll (₹)', data: [totalNet], fill: true, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)' }],
+          labels: rows.map((r) => r.department_name),
+          datasets: [
+            {
+              label: 'Monthly Payroll Cost (₹)',
+              data: rows.map((r) => r.total_salary_expense),
+              backgroundColor: 'rgba(59, 130, 246, 0.6)',
+              borderColor: 'rgba(59, 130, 246, 1)',
+              borderWidth: 1,
+            },
+          ],
         });
       } catch {
         const deptCount = {};
@@ -92,6 +102,16 @@ export default function DashboardPage() {
           labels: Object.keys(payrollCosts).sort(),
           datasets: [{ label: 'Total Payroll (₹)', data: Object.keys(payrollCosts).sort().map((m) => payrollCosts[m]), fill: true, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)' }],
         });
+
+        // Fallback dept payroll rows
+        const byDept = {};
+        employees.forEach((e) => {
+          const dept = e.department_name || 'Unassigned';
+          if (!byDept[dept]) byDept[dept] = { department_name: dept, total_employees: 0, total_salary_expense: 0 };
+          byDept[dept].total_employees += 1;
+          byDept[dept].total_salary_expense += Number(e.salary || 0);
+        });
+        setDeptPayrollRows(Object.values(byDept));
       }
     };
     fetchCharts();
@@ -131,9 +151,51 @@ export default function DashboardPage() {
               {attendanceChartData ? <DoughnutChart data={attendanceChartData} height={280} /> : <div className="h-[280px] flex items-center justify-center text-gray-500">No data</div>}
             </div>
           </div>
-          <div className="card p-6">
-            <h2 className="text-lg font-semibold mb-4">Monthly Payroll Cost</h2>
-            {payrollChartData ? <LineChart data={payrollChartData} height={280} /> : <div className="h-[280px] flex items-center justify-center text-gray-500">No data</div>}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div className="card p-6">
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <h2 className="text-lg font-semibold">Monthly Payroll Cost (Department-wise)</h2>
+                <span className="text-xs text-gray-500">Includes labels, legend & tooltips</span>
+              </div>
+              {payrollChartData ? (
+                <BarChart
+                  data={payrollChartData}
+                  height={320}
+                  options={{
+                    plugins: {
+                      legend: { position: 'bottom' },
+                      tooltip: {
+                        enabled: true,
+                        callbacks: {
+                          label: (ctx) => `₹${Number(ctx.raw || 0).toLocaleString()}`,
+                        },
+                      },
+                    },
+                    scales: { y: { beginAtZero: true, ticks: { callback: (v) => `₹${Number(v).toLocaleString()}` } } },
+                  }}
+                />
+              ) : (
+                <div className="h-[320px] flex items-center justify-center text-gray-500">No data</div>
+              )}
+            </div>
+            <div className="card overflow-hidden">
+              <h2 className="px-4 py-3 text-lg font-semibold border-b">Department-wise Payroll Table</h2>
+              <Table
+                columns={[
+                  { key: 'department_name', label: 'Department Name', sortable: true },
+                  { key: 'total_employees', label: 'Total Employees', sortable: true },
+                  {
+                    key: 'total_salary_expense',
+                    label: 'Total Salary Expense',
+                    sortable: true,
+                    render: (r) => `₹${Number(r.total_salary_expense || 0).toLocaleString()}`,
+                  },
+                ]}
+                data={deptPayrollRows}
+                keyField="department_name"
+                emptyMessage="No department payroll data"
+              />
+            </div>
           </div>
         </>
       )}

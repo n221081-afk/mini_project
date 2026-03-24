@@ -108,3 +108,36 @@ exports.delete = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+exports.applySalaryHike = async (req, res) => {
+  try {
+    const employee = await Employee.findById(req.params.id);
+    if (!employee) {
+      return res.status(404).json({ success: false, message: 'Employee not found' });
+    }
+    const hikeAmount = Number(req.body.hike_amount || 0);
+    if (Number.isNaN(hikeAmount) || hikeAmount <= 0) {
+      return res.status(400).json({ success: false, message: 'Valid hike_amount is required' });
+    }
+    const currentSalary = Number(employee.salary || 0);
+    await Employee.update(req.params.id, { salary: currentSalary + hikeAmount });
+    const updated = await Employee.findById(req.params.id);
+    res.json({ success: true, message: 'Salary hike applied', data: updated });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+exports.terminateEmployee = async (req, res) => {
+  try {
+    const employee = await Employee.findById(req.params.id);
+    if (!employee) {
+      return res.status(404).json({ success: false, message: 'Employee not found' });
+    }
+    await Employee.update(req.params.id, { status: 'terminated' });
+    const updated = await Employee.findById(req.params.id);
+    res.json({ success: true, message: 'Employee terminated', data: updated });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
