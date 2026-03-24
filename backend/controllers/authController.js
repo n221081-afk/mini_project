@@ -5,9 +5,12 @@ const User = require('../models/User');
 const Employee = require('../models/Employee');
 
 const generateToken = (user) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT secret is not configured');
+  }
   return jwt.sign(
     { id: user._id || user.id, email: user.email, role: user.role },
-    process.env.JWT_SECRET || 'your-jwt-secret-key',
+    process.env.JWT_SECRET,
     { expiresIn: '7d' }
   );
 };
@@ -16,23 +19,24 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+      return res.status(400).json({ success: false, message: 'Email and password are required' });
     }
 
     const user = await User.findByEmail(email);
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
     const token = generateToken(user);
     const employee = await Employee.findByUserId(user._id || user.id);
     
     res.json({
+      success: true,
       token,
       user: {
         id: user._id || user.id,
@@ -43,7 +47,7 @@ exports.login = async (req, res) => {
       employee: employee ? { id: employee.id, employee_code: employee.employee_code } : null
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
   }
 };
 

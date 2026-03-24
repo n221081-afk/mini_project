@@ -88,7 +88,7 @@ Employee.findById = async function (id) {
     ...doc,
     id: doc._id,
     department_name: doc.department?.name,
-    department_code: d.department?.code,
+    department_code: doc.department?.code,
     department_id: doc.department?._id,
     first_name: doc.first_name || doc.firstName,
     last_name: doc.last_name || doc.lastName,

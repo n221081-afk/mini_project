@@ -19,8 +19,10 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 router.get('/', authMiddleware, employeeController.getAll);
 router.get('/profile', authMiddleware, employeeController.getProfile);
 router.get('/:id', authMiddleware, employeeController.getById);
-router.post('/', authMiddleware, roleMiddleware('admin', 'hr_manager'), upload.single('profile_photo'), employeeController.create);
-router.put('/:id', authMiddleware, roleMiddleware('admin', 'hr_manager'), upload.single('profile_photo'), employeeController.update);
+router.post('/', authMiddleware, roleMiddleware('admin', 'hr', 'hr_manager'), upload.single('profile_photo'), employeeController.create);
+router.put('/:id', authMiddleware, roleMiddleware('admin', 'hr', 'hr_manager'), upload.single('profile_photo'), employeeController.update);
+router.put('/:id/salary-hike', authMiddleware, roleMiddleware('admin', 'hr', 'hr_manager'), employeeController.applySalaryHike);
+router.put('/:id/terminate', authMiddleware, roleMiddleware('admin'), employeeController.terminateEmployee);
 router.delete('/:id', authMiddleware, roleMiddleware('admin'), employeeController.delete);
 
 module.exports = router;

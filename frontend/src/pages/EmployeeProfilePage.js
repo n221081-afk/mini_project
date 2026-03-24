@@ -1,20 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getById } from '../services/employeeService';
-import { employees } from '../data/dummyData';
+import { getAll as getPerformanceReviews } from '../services/performanceService';
+import { useAuth } from '../context/AuthContext';
 
 export default function EmployeeProfilePage() {
   const { id } = useParams();
+  const { user } = useAuth();
   const [employee, setEmployee] = useState(null);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetch = async () => {
       try {
-        const res = await getById(id);
-        setEmployee(res.data);
-      } catch {
-        setEmployee(employees.find((e) => e.id === id) || employees[0]);
+        const [employeeRes, reviewRes] = await Promise.all([
+          getById(id),
+          getPerformanceReviews({ employee_id: id }).catch(() => ({ data: { data: [] } })),
+        ]);
+        setEmployee(employeeRes.data);
+        setReviews(reviewRes.data?.data || []);
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to load employee profile');
+        setEmployee(null);
       } finally {
         setLoading(false);
       }
@@ -23,7 +32,12 @@ export default function EmployeeProfilePage() {
   }, [id]);
 
   if (loading) return <div className="py-12 text-center text-gray-500">Loading...</div>;
+  if (error) return <div className="py-12 text-center text-red-600">{error}</div>;
   if (!employee) return <div className="py-12 text-center">Employee not found. <Link to="/employees" className="text-primary-600">Back to list</Link></div>;
+  if (user?.role === 'employee' && user?.employee_id && user.employee_id !== id) {
+    return <div className="py-12 text-center text-red-600">Access denied for this profile.</div>;
+  }
+  const latestRating = reviews[0]?.rating;
 
   const fields = [
     { label: 'Employee ID', value: employee.employee_code },
@@ -36,6 +50,9 @@ export default function EmployeeProfilePage() {
     { label: 'Job Title', value: employee.designation },
     { label: 'Join Date', value: employee.join_date },
     { label: 'Salary', value: employee.salary ? `₹${Number(employee.salary).toLocaleString()}` : '' },
+    { label: 'Role', value: employee.role || 'employee' },
+    { label: 'Performance Rating', value: latestRating ? `${latestRating}/5` : 'N/A' },
+    { label: 'Latest Review', value: reviews[0]?.comments || 'N/A' },
     { label: 'Status', value: employee.status },
   ];
 

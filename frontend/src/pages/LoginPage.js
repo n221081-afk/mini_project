@@ -17,15 +17,10 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const res = await login(email, password);
-      setAuth(res.user, res.token);
+      setAuth({ ...res.user, employee_id: res.employee?.id || null }, res.token);
       navigate('/');
     } catch (err) {
-      if (email === 'admin@enterprisehr.com' && password === 'password123') {
-        setAuth({ id: '1', name: 'Admin User', email: 'admin@enterprisehr.com', role: 'admin' }, 'demo-token');
-        navigate('/');
-      } else {
-        setError(err.response?.data?.message || 'Invalid credentials. Try admin@enterprisehr.com / password123');
-      }
+      setError(err.response?.data?.message || 'Invalid credentials');
     } finally {
       setLoading(false);
     }
@@ -56,20 +51,12 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-8">
           <div className="text-center space-y-4">
             <div className="banner-pill justify-center">
-              <span className="text-lg">🇮🇳</span>
-              <span>Made in India • Trusted by 1,000+ Companies</span>
-            </div>
+              <span className="text-lg">🇮🇳</span>            </div>
             <h1 className="text-3xl md:text-4xl font-bold text-dark leading-tight">
-              Free HRMS & Payroll Software
+              JAGGU's EMPIRE
               <br />
-              <span className="text-primary-600">Built for Indian Businesses</span>
-            </h1>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              Automate payroll, leave, attendance & compliance – <strong>free for up to 10 employees</strong>, ₹49/user after that.
-            </p>
-            <p className="text-gray-500 text-xs">
-              PF · ESI · PT · TDS · Biometric · Mobile App · ATS · Performance · Assets – all in one free HR software.
-            </p>
+                          </h1>
+          
           </div>
 
           <div className="card p-8 shadow-lg">
@@ -106,7 +93,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full btn-primary py-3.5 disabled:opacity-50"
               >
-                {loading ? 'Signing in...' : 'Start Free – No Credit Card'}
+                {loading ? 'Signing in...' : 'Login'}
               </button>
               <button
                 type="button"
@@ -116,20 +103,6 @@ export default function LoginPage() {
                 Book a Demo →
               </button>
             </form>
-            <p className="mt-5 text-center text-sm text-gray-500">
-              Demo: admin@enterprisehr.com / password123
-            </p>
-          </div>
-
-          <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
-            <div className="flex items-center gap-1">
-              <span className="flex">★★★★★</span>
-              <span>4.8/5 on G2</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="flex">★★★★★</span>
-              <span>4.9/5 Capterra</span>
-            </div>
           </div>
         </div>
       </main>

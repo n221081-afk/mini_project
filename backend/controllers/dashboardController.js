@@ -39,12 +39,10 @@ exports.getStats = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("❌ ERROR IN getStats:", error); // VERY IMPORTANT
+    console.error("ERROR IN getStats:", error);
     res.status(500).json({
       success: false,
-      message: "Server error",
-      error: error.message,
-      stack: error.stack
+      message: "Server error"
     });
   }
 };

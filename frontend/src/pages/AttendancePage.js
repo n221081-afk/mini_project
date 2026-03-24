@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { clockIn, clockOut, getByEmployee, getMonthlyReport } from '../services/attendanceService';
-import { attendanceRecords } from '../data/dummyData';
 import Table from '../components/Table';
 import { BarChart } from '../components/Charts';
+import { useAuth } from '../context/AuthContext';
 
 export default function AttendancePage() {
+  const { user } = useAuth();
   const [records, setRecords] = useState([]);
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
   const [clockedIn, setClockedIn] = useState(false);
@@ -15,17 +16,10 @@ export default function AttendancePage() {
     const fetch = async () => {
       try {
         const res = await getMonthlyReport(month);
-        setRecords(res.data || []);
-      } catch {
-        const filtered = attendanceRecords.filter((r) => r.date?.startsWith(month));
-        const byEmp = {};
-        filtered.forEach((r) => {
-          const key = r.employee_id;
-          if (!byEmp[key]) byEmp[key] = { ...r, present_days: 0, absent_days: 0 };
-          if (r.status === 'present') byEmp[key].present_days++;
-          else byEmp[key].absent_days++;
-        });
-        setRecords(Object.values(byEmp));
+        setRecords(res.data?.data || []);
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to load attendance');
+        setRecords([]);
       }
     };
     fetch();
@@ -37,9 +31,9 @@ export default function AttendancePage() {
     try {
       await clockIn();
       setClockedIn(true);
+      setError('');
     } catch (err) {
-      setError(err.response?.data?.message || 'Clock-in failed. Using demo mode.');
-      setClockedIn(true);
+      setError(err.response?.data?.message || 'Clock-in failed.');
     } finally {
       setLoading(false);
     }
@@ -51,9 +45,9 @@ export default function AttendancePage() {
     try {
       await clockOut();
       setClockedIn(false);
+      setError('');
     } catch (err) {
-      setError(err.response?.data?.message || 'Clock-out recorded (demo).');
-      setClockedIn(false);
+      setError(err.response?.data?.message || 'Clock-out failed.');
     } finally {
       setLoading(false);
     }
@@ -80,22 +74,24 @@ export default function AttendancePage() {
     <div className="space-y-6">
       <h1 className="page-header">Attendance</h1>
       <div className="flex flex-col sm:flex-row gap-4 items-start">
-        <div className="card p-6 flex gap-4">
-          <button
-            onClick={handleClockIn}
-            disabled={loading || clockedIn}
-            className="btn-primary disabled:opacity-50"
-          >
-            Clock In
-          </button>
-          <button
-            onClick={handleClockOut}
-            disabled={loading || !clockedIn}
-            className="btn-secondary disabled:opacity-50"
-          >
-            Clock Out
-          </button>
-        </div>
+        {user?.role === 'employee' && (
+          <div className="card p-6 flex gap-4">
+            <button
+              onClick={handleClockIn}
+              disabled={loading || clockedIn}
+              className="btn-primary disabled:opacity-50"
+            >
+              Clock In
+            </button>
+            <button
+              onClick={handleClockOut}
+              disabled={loading || !clockedIn}
+              className="btn-secondary disabled:opacity-50"
+            >
+              Clock Out
+            </button>
+          </div>
+        )}
         <select
           value={month}
           onChange={(e) => setMonth(e.target.value)}

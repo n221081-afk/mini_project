@@ -2,16 +2,16 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const allMenuItems = [
-  { path: '/', icon: 'dashboard', label: 'Dashboard', roles: ['admin', 'hr_manager', 'employee'] },
-  { path: '/employees', icon: 'people', label: 'Employees', roles: ['admin', 'hr_manager'] },
-  { path: '/departments', icon: 'business', label: 'Departments', roles: ['admin', 'hr_manager'] },
-  { path: '/attendance', icon: 'schedule', label: 'Attendance', roles: ['admin', 'hr_manager', 'employee'] },
-  { path: '/leave', icon: 'event_available', label: 'Leaves', roles: ['admin', 'hr_manager', 'employee'] },
-  { path: '/payroll', icon: 'payments', label: 'Payroll', roles: ['admin', 'hr_manager', 'employee'] },
-  { path: '/recruitment', icon: 'work', label: 'Recruitment', roles: ['admin', 'hr_manager'] },
-  { path: '/performance', icon: 'star', label: 'Performance', roles: ['admin', 'hr_manager'] },
-  { path: '/reports', icon: 'assessment', label: 'Reports', roles: ['admin', 'hr_manager'] },
-  { path: '/settings', icon: 'settings', label: 'Settings', roles: ['admin', 'hr_manager', 'employee'] },
+  { path: '/', icon: 'dashboard', label: 'Dashboard', roles: ['admin', 'hr', 'employee'] },
+  { path: '/employees', icon: 'people', label: 'Employees', roles: ['admin', 'hr'] },
+  { path: '/departments', icon: 'business', label: 'Departments', roles: ['admin', 'hr'] },
+  { path: '/attendance', icon: 'schedule', label: 'Attendance', roles: ['admin', 'hr', 'employee'] },
+  { path: '/leave', icon: 'event_available', label: 'Leaves', roles: ['admin', 'hr', 'employee'] },
+  { path: '/payroll', icon: 'payments', label: 'Payroll', roles: ['admin', 'hr', 'employee'] },
+  { path: '/recruitment', icon: 'work', label: 'Recruitment', roles: ['admin', 'hr'] },
+  { path: '/performance', icon: 'star', label: 'Performance', roles: ['admin', 'hr'] },
+  { path: '/reports', icon: 'assessment', label: 'Reports', roles: ['admin', 'hr'] },
+  { path: '/settings', icon: 'settings', label: 'Settings', roles: ['admin', 'hr', 'employee'] },
 ];
 
 const icons = {
@@ -29,7 +29,7 @@ const icons = {
 
 export default function Sidebar({ open, onClose }) {
   const { user } = useAuth();
-  const role = user?.role || 'employee';
+  const role = user?.role === 'hr_manager' ? 'hr' : user?.role || 'employee';
   const menuItems = allMenuItems.filter((item) => !item.roles || item.roles.includes(role));
 
   return (

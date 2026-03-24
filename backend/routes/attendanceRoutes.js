@@ -7,7 +7,7 @@ const attendanceController = require('../controllers/attendanceController');
 router.post('/clock-in', authMiddleware, attendanceController.clockIn);
 router.post('/clock-out', authMiddleware, attendanceController.clockOut);
 router.get('/employee/:employeeId?', authMiddleware, attendanceController.getByEmployee);
-router.get('/monthly-report', authMiddleware, roleMiddleware('admin', 'hr_manager'), attendanceController.getMonthlyReport);
-router.post('/admin-correction', authMiddleware, roleMiddleware('admin', 'hr_manager'), attendanceController.adminCorrection);
+router.get('/monthly-report', authMiddleware, attendanceController.getMonthlyReport);
+router.post('/admin-correction', authMiddleware, roleMiddleware('admin', 'hr', 'hr_manager'), attendanceController.adminCorrection);
 
 module.exports = router;
