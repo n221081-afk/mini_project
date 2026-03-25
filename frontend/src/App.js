@@ -19,6 +19,7 @@ const RecruitmentPage = lazy(() => import('./pages/RecruitmentPage'));
 const PerformancePage = lazy(() => import('./pages/PerformancePage'));
 const ReportsPage = lazy(() => import('./pages/ReportsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const DocumentRequestsPage = lazy(() => import('./pages/DocumentRequestsPage'));
 
 const normalizeRole = (role) => (role === 'hr_manager' ? 'hr' : role);
 
@@ -176,6 +177,16 @@ export default function App() {
               <PrivateRoute>
                 <Layout>
                   <SettingsPage />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/document-requests"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <DocumentRequestsPage />
                 </Layout>
               </PrivateRoute>
             }

@@ -53,10 +53,10 @@ export default function LoginPage() {
             <div className="banner-pill justify-center">
               <span className="text-lg">🇮🇳</span>            </div>
             <h1 className="text-3xl md:text-4xl font-bold text-dark leading-tight">
-              JAGGU's EMPIRE
+              NEXTHIRE COMPANY
               <br />
-                          </h1>
-          
+            </h1>
+
           </div>
 
           <div className="card p-8 shadow-lg">
@@ -95,13 +95,7 @@ export default function LoginPage() {
               >
                 {loading ? 'Signing in...' : 'Login'}
               </button>
-              <button
-                type="button"
-                className="w-full btn-secondary py-3.5"
-                onClick={() => {}}
-              >
-                Book a Demo →
-              </button>
+
             </form>
             <p className="mt-5 text-center text-sm text-gray-500">
               Demo: sdchandu213@gmail.com / password123
@@ -124,7 +118,7 @@ export default function LoginPage() {
       <div className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-primary-500 text-white flex items-center justify-center shadow-lg hover:bg-primary-600 transition-colors cursor-pointer">
         <span className="relative">
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
           </svg>
           <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center text-white">1</span>
         </span>

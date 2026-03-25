@@ -122,7 +122,7 @@ export default function PayrollPage() {
           <div className="py-12 text-center text-gray-500">Loading...</div>
         ) : (
           <>
-            <Table columns={columns} data={data} keyField="_id" emptyMessage="No payroll records" />
+            <Table columns={columns} data={data} keyField="_id" emptyMessage={!canGenerate ? "No payroll record available for you yet" : "No payroll records"} />
             <Pagination page={page} totalPages={Math.ceil(total / ITEMS_PER_PAGE)} onPageChange={setPage} />
           </>
         )}

@@ -14,6 +14,7 @@ require('./models/Payroll');
 require('./models/Department'); 
 require('./models/Performance'); 
 require('./models/Recruitment'); // if used
+require('./models/DocumentRequest');
 require('./models/User'); // if auth uses it
 
 const authRoutes = require('./routes/authRoutes');
@@ -26,6 +27,7 @@ const recruitmentRoutes = require('./routes/recruitmentRoutes');
 const performanceRoutes = require('./routes/performanceRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const documentRequestRoutes = require('./routes/documentRequestRoutes');
 
 const app = express();
 
@@ -52,6 +54,7 @@ app.use('/api/recruitment', recruitmentRoutes);
 app.use('/api/performance', performanceRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/document-requests', documentRequestRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

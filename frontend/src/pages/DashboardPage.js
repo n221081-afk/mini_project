@@ -422,52 +422,54 @@ export default function DashboardPage() {
               {attendanceChartData ? <DoughnutChart data={attendanceChartData} height={280} /> : <div className="h-[280px] flex items-center justify-center text-gray-500">No data</div>}
             </div>
           </div>
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <div className="card p-6">
-              <div className="flex items-center justify-between gap-4 mb-4">
-                <h2 className="text-lg font-semibold">Monthly Payroll Cost (Department-wise)</h2>
-                <span className="text-xs text-gray-500">Includes labels, legend & tooltips</span>
-              </div>
-              {payrollChartData ? (
-                <BarChart
-                  data={payrollChartData}
-                  height={320}
-                  options={{
-                    plugins: {
-                      legend: { position: 'bottom' },
-                      tooltip: {
-                        enabled: true,
-                        callbacks: {
-                          label: (ctx) => `₹${Number(ctx.raw || 0).toLocaleString()}`,
+          {user?.role !== 'admin' && (
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <div className="card p-6">
+                <div className="flex items-center justify-between gap-4 mb-4">
+                  <h2 className="text-lg font-semibold">Monthly Payroll Cost (Department-wise)</h2>
+                  <span className="text-xs text-gray-500">Includes labels, legend & tooltips</span>
+                </div>
+                {payrollChartData ? (
+                  <BarChart
+                    data={payrollChartData}
+                    height={320}
+                    options={{
+                      plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                          enabled: true,
+                          callbacks: {
+                            label: (ctx) => `₹${Number(ctx.raw || 0).toLocaleString()}`,
+                          },
                         },
                       },
+                      scales: { y: { beginAtZero: true, ticks: { callback: (v) => `₹${Number(v).toLocaleString()}` } } },
+                    }}
+                  />
+                ) : (
+                  <div className="h-[320px] flex items-center justify-center text-gray-500">No data</div>
+                )}
+              </div>
+              <div className="card overflow-hidden">
+                <h2 className="px-4 py-3 text-lg font-semibold border-b">Department-wise Payroll Table</h2>
+                <Table
+                  columns={[
+                    { key: 'department_name', label: 'Department Name', sortable: true },
+                    { key: 'total_employees', label: 'Total Employees', sortable: true },
+                    {
+                      key: 'total_salary_expense',
+                      label: 'Total Salary Expense',
+                      sortable: true,
+                      render: (r) => `₹${Number(r.total_salary_expense || 0).toLocaleString()}`,
                     },
-                    scales: { y: { beginAtZero: true, ticks: { callback: (v) => `₹${Number(v).toLocaleString()}` } } },
-                  }}
+                  ]}
+                  data={deptPayrollRows}
+                  keyField="department_name"
+                  emptyMessage="No department payroll data"
                 />
-              ) : (
-                <div className="h-[320px] flex items-center justify-center text-gray-500">No data</div>
-              )}
+              </div>
             </div>
-            <div className="card overflow-hidden">
-              <h2 className="px-4 py-3 text-lg font-semibold border-b">Department-wise Payroll Table</h2>
-              <Table
-                columns={[
-                  { key: 'department_name', label: 'Department Name', sortable: true },
-                  { key: 'total_employees', label: 'Total Employees', sortable: true },
-                  {
-                    key: 'total_salary_expense',
-                    label: 'Total Salary Expense',
-                    sortable: true,
-                    render: (r) => `₹${Number(r.total_salary_expense || 0).toLocaleString()}`,
-                  },
-                ]}
-                data={deptPayrollRows}
-                keyField="department_name"
-                emptyMessage="No department payroll data"
-              />
-            </div>
-          </div>
+          )}
 
           <Modal isOpen={showQuickLeave} onClose={() => setShowQuickLeave(false)} title="Quick Apply Leave">
             <form onSubmit={submitQuickLeave} className="space-y-4">

@@ -9,8 +9,8 @@ exports.getAll = async (req, res) => {
   try {
     const employee = await Employee.findByUserId(req.user.id);
     const filters = { ...req.query };
-    if (req.user.role === 'employee' && employee) {
-      filters.employee_id = employee.id || employee._id;
+    if (!hasManagerAccess(req.user.role)) {
+      filters.employee_id = employee ? (employee.id || employee._id) : new mongoose.Types.ObjectId(); // invalid access returns empty
     }
     const page = Number(req.query.page || 1);
     const limit = Number(req.query.limit || 10);

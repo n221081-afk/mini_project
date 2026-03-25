@@ -24,18 +24,15 @@ export default function LeavePage() {
   const [success, setSuccess] = useState('');
 
   const loadLeaves = async () => {
-    const [res, st] = await Promise.all([getAll(), getStats().catch(() => ({ data: { data: [] } }))]);
+    const res = await getAll();
     const leaveData = res.data?.data || [];
     setLeaves(leaveData);
-    const rawStats = st.data?.data || [];
-    if (Array.isArray(rawStats)) {
-      const pending = rawStats.filter((s) => s.status === 'pending').reduce((a, s) => a + (s.count || 0), 0);
-      const approved = rawStats.filter((s) => s.status === 'approved').reduce((a, s) => a + (s.count || 0), 0);
-      const rejected = rawStats.filter((s) => s.status === 'rejected').reduce((a, s) => a + (s.count || 0), 0);
-      setStats({ pending, approved, rejected });
-    } else {
-      setStats({ pending: 0, approved: 0, rejected: 0 });
-    }
+    
+    // Dynamically calculate stats based on the fetched leaveData
+    const pending = leaveData.filter((l) => l.status === 'pending').length;
+    const approved = leaveData.filter((l) => l.status === 'approved').length;
+    const rejected = leaveData.filter((l) => l.status === 'rejected').length;
+    setStats({ pending, approved, rejected });
   };
 
   useEffect(() => {
@@ -135,9 +132,11 @@ export default function LeavePage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="page-header">Leave Management</h1>
-        <button onClick={() => setShowApply(true)} className="btn-primary w-fit">
-          Apply Leave
-        </button>
+        {user?.role !== 'admin' && (
+          <button onClick={() => setShowApply(true)} className="btn-primary w-fit">
+            Apply Leave
+          </button>
+        )}
       </div>
       {error && <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>}
       {success && <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm">{success}</div>}
