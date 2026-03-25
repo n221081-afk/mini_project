@@ -8,7 +8,7 @@ require('../models/User');
 require('../models/Department');
 require('../models/Employee');
 require('../models/Attendance');
-// require('../models/Leave');
+require('../models/Leave');
 require('../models/Payroll');
 require('../models/Recruitment');
 require('../models/Performance');
@@ -17,7 +17,7 @@ const User = mongoose.model('User');
 const Department = mongoose.model('Department');
 const Employee = mongoose.model('Employee');
 const Attendance = mongoose.model('Attendance');
-// const Leave = mongoose.model('Leave');
+const Leave = mongoose.model('Leave');
 const Payroll = mongoose.model('Payroll');
 const Recruitment = mongoose.model('Recruitment');
 const Performance = mongoose.model('Performance');
@@ -40,7 +40,7 @@ async function seed() {
     await Employee.deleteMany();
     await User.deleteMany();
     await Attendance.deleteMany();
-    // await Leave.deleteMany();
+    await Leave.deleteMany();
     await Payroll.deleteMany();
     await Recruitment.deleteMany();
     await Performance.deleteMany();
@@ -95,9 +95,11 @@ async function seed() {
     const employees = await Employee.find({ status: 'active' }).select('_id').limit(30).lean();
     const empIds = employees.map(e => e._id);
 
+    const now = new Date();
+
     for (const empId of empIds.slice(0, 25)) {
       for (let m = 0; m < 3; m++) {
-        const baseDate = new Date(2025, 2 - m, 1);
+        const baseDate = new Date(now.getFullYear(), now.getMonth() - m, 1);
         const daysInMonth = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0).getDate();
         for (let d = 1; d <= Math.min(daysInMonth, 22); d++) {
           const date = new Date(baseDate.getFullYear(), baseDate.getMonth(), d);
@@ -123,8 +125,13 @@ async function seed() {
     }
 
     const empList = await Employee.find({ status: 'active' }).select('_id salary').lean();
+    
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const prevMonth = `${prevMonthDate.getFullYear()}-${String(prevMonthDate.getMonth() + 1).padStart(2, '0')}`;
+
     for (const emp of empList) {
-      for (const month of ['2025-01', '2025-02']) {
+      for (const month of [prevMonth, currentMonth]) {
         const basic = emp.salary;
         const hra = Math.round(basic * 0.2);
         const gross = basic + hra;
@@ -153,20 +160,21 @@ async function seed() {
       }
     }
 
-    // const leaveTypes = ['sick_leave', 'casual_leave', 'paid_leave', 'work_from_home'];
-    // const statuses = ['pending', 'approved', 'rejected'];
-    // for (let i = 0; i < 10; i++) {
-    //   const start = new Date(2025, 2, 5 + i);
-    //   const end = new Date(2025, 2, 6 + i);
-    //   await Leave.create({
-    //     employee: empIds[i % empIds.length],
-    //     leave_type: leaveTypes[i % 4],
-    //     start_date: start,
-    //     end_date: end,
-    //     reason: 'Sample reason',
-    //     status: statuses[i % 3]
-    //   });
-    // }
+    const leaveTypes = ['sick_leave', 'casual_leave', 'paid_leave', 'work_from_home'];
+    const statuses = ['pending', 'approved', 'rejected'];
+    for (let i = 0; i < 10; i++) {
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (i - 5));
+      const end = new Date(start);
+      end.setDate(start.getDate() + 1);
+      await Leave.create({
+        employee: empIds[i % empIds.length],
+        leave_type: leaveTypes[i % 4],
+        start_date: start,
+        end_date: end,
+        reason: 'Sample reason',
+        status: statuses[i % 3]
+      });
+    }
 
     const jobs = ['Software Engineer', 'HR Associate', 'Financial Analyst'];
     for (let i = 0; i < 5; i++) {
@@ -181,8 +189,8 @@ async function seed() {
 
     for (let i = 0; i < 15; i++) {
       await Performance.create({
-        employee_id: empIds[i],
-        review_date: new Date('2025-01-15'),
+        employee: empIds[i],
+        review_date: new Date(now.getFullYear(), now.getMonth(), Math.max(1, now.getDate() - 15)),
         rating: 3 + (i % 3),
         comments: 'Good performance'
       });
