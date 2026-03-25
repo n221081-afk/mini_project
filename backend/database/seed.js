@@ -8,7 +8,7 @@ require('../models/User');
 require('../models/Department');
 require('../models/Employee');
 require('../models/Attendance');
-require('../models/Leave');
+// require('../models/Leave');
 require('../models/Payroll');
 require('../models/Recruitment');
 require('../models/Performance');
@@ -17,7 +17,7 @@ const User = mongoose.model('User');
 const Department = mongoose.model('Department');
 const Employee = mongoose.model('Employee');
 const Attendance = mongoose.model('Attendance');
-const Leave = mongoose.model('Leave');
+// const Leave = mongoose.model('Leave');
 const Payroll = mongoose.model('Payroll');
 const Recruitment = mongoose.model('Recruitment');
 const Performance = mongoose.model('Performance');
@@ -40,7 +40,7 @@ async function seed() {
     await Employee.deleteMany();
     await User.deleteMany();
     await Attendance.deleteMany();
-    await Leave.deleteMany();
+    // await Leave.deleteMany();
     await Payroll.deleteMany();
     await Recruitment.deleteMany();
     await Performance.deleteMany();
@@ -153,20 +153,20 @@ async function seed() {
       }
     }
 
-    const leaveTypes = ['sick_leave', 'casual_leave', 'paid_leave', 'work_from_home'];
-    const statuses = ['pending', 'approved', 'rejected'];
-    for (let i = 0; i < 10; i++) {
-      const start = new Date(2025, 2, 5 + i);
-      const end = new Date(2025, 2, 6 + i);
-      await Leave.create({
-        employee_id: empIds[i % empIds.length],
-        leave_type: leaveTypes[i % 4],
-        start_date: start,
-        end_date: end,
-        reason: 'Sample reason',
-        status: statuses[i % 3]
-      });
-    }
+    // const leaveTypes = ['sick_leave', 'casual_leave', 'paid_leave', 'work_from_home'];
+    // const statuses = ['pending', 'approved', 'rejected'];
+    // for (let i = 0; i < 10; i++) {
+    //   const start = new Date(2025, 2, 5 + i);
+    //   const end = new Date(2025, 2, 6 + i);
+    //   await Leave.create({
+    //     employee: empIds[i % empIds.length],
+    //     leave_type: leaveTypes[i % 4],
+    //     start_date: start,
+    //     end_date: end,
+    //     reason: 'Sample reason',
+    //     status: statuses[i % 3]
+    //   });
+    // }
 
     const jobs = ['Software Engineer', 'HR Associate', 'Financial Analyst'];
     for (let i = 0; i < 5; i++) {

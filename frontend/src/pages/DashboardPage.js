@@ -21,10 +21,61 @@ import toast from 'react-hot-toast';
 export default function DashboardPage() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
-  const [deptChartData, setDeptChartData] = useState(null);
-  const [attendanceChartData, setAttendanceChartData] = useState(null);
-  const [payrollChartData, setPayrollChartData] = useState(null);
-  const [deptPayrollRows, setDeptPayrollRows] = useState([]);
+
+  // Initialize with dummy data
+  const getInitialDeptData = () => {
+    const deptCount = {};
+    employees.forEach((e) => {
+      const name = e.department_name || 'Other';
+      deptCount[name] = (deptCount[name] || 0) + 1;
+    });
+    return {
+      labels: Object.keys(deptCount),
+      datasets: [{ data: Object.values(deptCount), backgroundColor: ['#10b981', '#059669', '#34d399', '#6ee7b7', '#047857'] }],
+    };
+  };
+
+  const getInitialAttendanceData = () => {
+    return {
+      labels: ['Present', 'Absent', 'Half Day', 'Leave'],
+      datasets: [{
+        data: [
+          attendanceRecords.filter((a) => a.status === 'present').length,
+          attendanceRecords.filter((a) => a.status === 'absent').length,
+          attendanceRecords.filter((a) => a.status === 'half_day').length,
+          attendanceRecords.filter((a) => a.status === 'leave').length,
+        ],
+        backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#6366f1'],
+      }],
+    };
+  };
+
+  const getInitialPayrollData = () => {
+    const payrollCosts = {};
+    payrollRecords.forEach((p) => {
+      payrollCosts[p.month] = (payrollCosts[p.month] || 0) + (p.net_salary || 0);
+    });
+    return {
+      labels: Object.keys(payrollCosts).sort(),
+      datasets: [{ label: 'Total Payroll (₹)', data: Object.keys(payrollCosts).sort().map((m) => payrollCosts[m]), fill: true, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)' }],
+    };
+  };
+
+  const getInitialPayrollRows = () => {
+    const byDept = {};
+    employees.forEach((e) => {
+      const dept = e.department_name || 'Unassigned';
+      if (!byDept[dept]) byDept[dept] = { department_name: dept, total_employees: 0, total_salary_expense: 0 };
+      byDept[dept].total_employees += 1;
+      byDept[dept].total_salary_expense += Number(e.salary || 0);
+    });
+    return Object.values(byDept);
+  };
+
+  const [deptChartData, setDeptChartData] = useState(getInitialDeptData);
+  const [attendanceChartData, setAttendanceChartData] = useState(getInitialAttendanceData);
+  const [payrollChartData, setPayrollChartData] = useState(getInitialPayrollData);
+  const [deptPayrollRows, setDeptPayrollRows] = useState(getInitialPayrollRows);
   const [loading, setLoading] = useState(true);
   const [showQuickLeave, setShowQuickLeave] = useState(false);
   const [leaveForm, setLeaveForm] = useState({ leave_type: 'casual_leave', start_date: '', end_date: '', reason: '' });
@@ -144,34 +195,16 @@ export default function DashboardPage() {
           departmentPayroll(month),
         ]);
         const deptList = Array.isArray(deptRes.data?.data) ? deptRes.data.data : [];
-        setDeptChartData({
-          labels: deptList.map((d) => d.department_name || d.name),
-          datasets: [{ data: deptList.map((d) => d.employee_count || d.count || 0), backgroundColor: ['#10b981', '#059669', '#34d399', '#6ee7b7', '#047857'] }],
-        });
         const attList = Array.isArray(attRes.data?.data) ? attRes.data.data : [];
-        const present = attList.reduce((s, r) => s + (r.present_days || 0), 0);
-        const absent = attList.reduce((s, r) => s + (r.absent_days || 0), 0);
-        setAttendanceChartData({
-          labels: ['Present', 'Absent', 'Half Day', 'Leave'],
-          datasets: [{ data: [present, absent, 0, 0], backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#6366f1'] }],
-        });
         const rows = Array.isArray(deptPayrollRes.data?.data) ? deptPayrollRes.data.data : [];
-        setDeptPayrollRows(rows);
-        setPayrollChartData({
-          labels: rows.map((r) => r.department_name),
-          datasets: [
-            {
-              label: 'Monthly Payroll Cost (₹)',
-              data: rows.map((r) => r.total_salary_expense),
-              backgroundColor: 'rgba(59, 130, 246, 0.6)',
-              borderColor: 'rgba(59, 130, 246, 1)',
-              borderWidth: 1,
-            },
-          ],
-        });
 
-        // Check if department data is empty, use dummy data
-        if (deptList.length === 0) {
+        // Department chart
+        if (deptList.length > 0) {
+          setDeptChartData({
+            labels: deptList.map((d) => d.department_name || d.name),
+            datasets: [{ data: deptList.map((d) => d.employee_count || d.count || 0), backgroundColor: ['#10b981', '#059669', '#34d399', '#6ee7b7', '#047857'] }],
+          });
+        } else {
           const deptCount = {};
           employees.forEach((e) => {
             const name = e.department_name || 'Other';
@@ -183,8 +216,15 @@ export default function DashboardPage() {
           });
         }
 
-        // Check if attendance data is empty, use dummy data
-        if (attList.length === 0) {
+        // Attendance chart
+        if (attList.length > 0) {
+          const present = attList.reduce((s, r) => s + (r.present_days || 0), 0);
+          const absent = attList.reduce((s, r) => s + (r.absent_days || 0), 0);
+          setAttendanceChartData({
+            labels: ['Present', 'Absent', 'Half Day', 'Leave'],
+            datasets: [{ data: [present, absent, 0, 0], backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#6366f1'] }],
+          });
+        } else {
           setAttendanceChartData({
             labels: ['Present', 'Absent', 'Half Day', 'Leave'],
             datasets: [{
@@ -199,8 +239,22 @@ export default function DashboardPage() {
           });
         }
 
-        // Check if payroll data is empty, use dummy data
-        if (rows.length === 0) {
+        // Payroll chart
+        if (rows.length > 0) {
+          setDeptPayrollRows(rows);
+          setPayrollChartData({
+            labels: rows.map((r) => r.department_name),
+            datasets: [
+              {
+                label: 'Monthly Payroll Cost (₹)',
+                data: rows.map((r) => r.total_salary_expense),
+                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1,
+              },
+            ],
+          });
+        } else {
           const payrollCosts = {};
           payrollRecords.forEach((p) => {
             payrollCosts[p.month] = (payrollCosts[p.month] || 0) + (p.net_salary || 0);
