@@ -59,8 +59,13 @@ async function seed() {
     const deptIds = [];
     for (const deptData of departments) {
       let dept = await Department.findOne({ name: deptData.name });
-      if (!dept) dept = await Department.create({ name: deptData.name, code: deptData.code });
-      deptIds.push(dept._id);
+      let currDeptId;
+      if (!dept) {
+        currDeptId = await Department.create({ name: deptData.name, code: deptData.code });
+      } else {
+        currDeptId = dept._id;
+      }
+      deptIds.push(currDeptId);
     }
 
     for (let i = 1; i <= 30; i++) {
@@ -104,17 +109,19 @@ async function seed() {
         for (let d = 1; d <= Math.min(daysInMonth, 22); d++) {
           const date = new Date(baseDate.getFullYear(), baseDate.getMonth(), d);
           if (date.getDay() !== 0 && date.getDay() !== 6) {
-            const dateStr = date.toISOString().split('T')[0];
-            const startOfDay = new Date(dateStr + 'T00:00:00');
+            const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+            const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+            const isPresent = Math.random() > 0.15;
+            const status = isPresent ? 'present' : 'absent';
             await Attendance.findOneAndUpdate(
-              { employee: empId, date: { $gte: startOfDay, $lte: new Date(dateStr + 'T23:59:59.999') } },
+              { employee: empId, date: { $gte: startOfDay, $lte: endOfDay } },
               {
                 $set: {
                   employee: empId,
                   date: startOfDay,
-                  status: 'present',
-                  clock_in: '09:00:00',
-                  clock_out: '18:00:00'
+                  status: status,
+                  clock_in: isPresent ? '09:00:00' : undefined,
+                  clock_out: isPresent ? '18:00:00' : undefined
                 }
               },
               { upsert: true }
