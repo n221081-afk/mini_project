@@ -136,10 +136,20 @@ exports.register = async (req, res) => {
 exports.setupAdmin = async (req, res) => {
   try {
     const adminExists = await User.findOne({ role: 'admin' }).lean();
+    
+    // If admin exists, forcefuly reset their password to "admin123" properly hashed
     if (adminExists) {
-      return res.status(400).json({ success: false, message: 'Admin already exists' });
+      const hashedPassword = await bcrypt.hash('admin123', 10);
+      await User.updatePassword(adminExists._id, { password: hashedPassword });
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Existing admin password has been forcefully reset and properly hashed', 
+        email: adminExists.email, 
+        password: 'admin123' 
+      });
     }
     
+    // Otherwise create the new fallback admin
     const hashedPassword = await bcrypt.hash('admin123', 10);
     await User.create({
       name: 'System Admin',
