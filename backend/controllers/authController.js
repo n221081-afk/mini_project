@@ -140,11 +140,11 @@ exports.setupAdmin = async (req, res) => {
     // If admin exists, forcefuly reset their password to "admin123" properly hashed
     if (adminExists) {
       const hashedPassword = await bcrypt.hash('admin123', 10);
-      await User.updatePassword(adminExists._id, { password: hashedPassword });
+      await User.update(adminExists._id, { password: hashedPassword, email: 'sdchandu213@gmail.com' });
       return res.status(200).json({ 
         success: true, 
-        message: 'Existing admin password has been forcefully reset and properly hashed', 
-        email: adminExists.email, 
+        message: 'Existing admin password has been forcefully reset and email updated to sdchandu213@gmail.com', 
+        email: 'sdchandu213@gmail.com', 
         password: 'admin123' 
       });
     }
@@ -153,7 +153,7 @@ exports.setupAdmin = async (req, res) => {
     const hashedPassword = await bcrypt.hash('admin123', 10);
     await User.create({
       name: 'System Admin',
-      email: 'admin@enterprisehr.com',
+      email: 'sdchandu213@gmail.com',
       password: hashedPassword,
       role: 'admin'
     });
@@ -161,7 +161,7 @@ exports.setupAdmin = async (req, res) => {
     res.status(201).json({ 
       success: true, 
       message: 'Fallback admin created successfully', 
-      email: 'admin@enterprisehr.com', 
+      email: 'sdchandu213@gmail.com', 
       password: 'admin123' 
     });
   } catch (error) {
