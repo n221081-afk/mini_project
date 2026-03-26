@@ -3,18 +3,31 @@ const Payroll = require('../models/Payroll');
 const Employee = require('../models/Employee');
 const { calculateNetSalary } = require('../utils/payrollCalculator');
 const { generatePayslipPDF } = require('../utils/pdfGenerator');
+const hasManagerAccess = (role) => ['admin', 'hr', 'hr_manager'].includes(role);
 
 exports.getAll = async (req, res) => {
   try {
     const employee = await Employee.findByUserId(req.user.id);
     const filters = { ...req.query };
-    if (req.user.role === 'employee' && employee) {
-      filters.employee_id = employee.id || employee._id;
+    if (!hasManagerAccess(req.user.role)) {
+      filters.employee_id = employee ? (employee.id || employee._id) : new mongoose.Types.ObjectId(); // invalid access returns empty
+    }
+    const page = Number(req.query.page || 1);
+    const limit = Number(req.query.limit || 10);
+    if (req.query.page && req.query.limit) {
+      filters.limit = limit;
+      filters.offset = (page - 1) * limit;
     }
     const payroll = await Payroll.findAll(filters);
-    res.json(payroll);
+    res.json({
+      success: true,
+      data: payroll,
+      page,
+      limit,
+      total: payroll.length,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -22,15 +35,15 @@ exports.getById = async (req, res) => {
   try {
     const payroll = await Payroll.findById(req.params.id);
     if (!payroll) {
-      return res.status(404).json({ message: 'Payroll record not found' });
+      return res.status(404).json({ success: false, message: 'Payroll record not found' });
     }
     const employee = await Employee.findByUserId(req.user.id);
-    if (req.user.role === 'employee' && employee && payroll.employee_id?.toString() !== (employee.id || employee._id)?.toString()) {
-      return res.status(403).json({ message: 'Access denied' });
+    if (!hasManagerAccess(req.user.role) && employee && payroll.employee_id?.toString() !== (employee.id || employee._id)?.toString()) {
+      return res.status(403).json({ success: false, message: 'Access denied' });
     }
-    res.json(payroll);
+    res.json({ success: true, data: payroll });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -39,7 +52,7 @@ exports.generateMonthly = async (req, res) => {
     const { month } = req.body;
     const payrollMonth = month || new Date().toISOString().slice(0, 7);
 
-    const employees = await Employee.find({}).select('_id salary').lean();
+    const employees = await Employee.find({ status: 'active' }).select('_id salary').lean();
 
     for (const emp of employees) {
       if (!emp.salary || emp.salary <= 0) {
@@ -52,21 +65,21 @@ exports.generateMonthly = async (req, res) => {
         month: payrollMonth,
         basic_salary: calc.basicSalary,
         hra: calc.hra,
-        allowances: calc.otherAllowances,
+        allowances: calc.otherAllowances + calc.bonus,
         bonus: calc.bonus,
         tax: calc.tax,
         pf: calc.pf,
         other_deductions: calc.otherDeductions,
-        net_salary: calc.netSalary,
+        net_salary: calc.basicSalary + (calc.otherAllowances + calc.bonus + calc.hra) - (calc.tax + calc.pf + calc.otherDeductions),
         status: 'processed'
       });
     }
 
     const payroll = await Payroll.findAll({ month: payrollMonth });
-    res.json({ message: 'Payroll generated', data: payroll });
+    res.json({ success: true, message: 'Payroll generated', data: payroll });
   } catch (error) {
     console.error("GENERATE PAYROLL ERROR:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -74,11 +87,11 @@ exports.downloadPayslip = async (req, res) => {
   try {
     const payroll = await Payroll.findById(req.params.id);
     if (!payroll) {
-      return res.status(404).json({ message: 'Payroll record not found' });
+      return res.status(404).json({ success: false, message: 'Payroll record not found' });
     }
     const employee = await Employee.findByUserId(req.user.id);
-    if (req.user.role === 'employee' && employee && payroll.employee_id?.toString() !== (employee.id || employee._id)?.toString()) {
-      return res.status(403).json({ message: 'Access denied' });
+    if (!hasManagerAccess(req.user.role) && employee && payroll.employee_id?.toString() !== (employee.id || employee._id)?.toString()) {
+      return res.status(403).json({ success: false, message: 'Access denied' });
     }
 
     const payslipData = {
@@ -101,6 +114,6 @@ exports.downloadPayslip = async (req, res) => {
     res.send(pdfBuffer);
   } catch (error) {
     console.error("PAYSLIP ERROR:", error);
-    res.status(500).json({ message: error.message});
+    res.status(500).json({ success: false, message: error.message});
   }
 };

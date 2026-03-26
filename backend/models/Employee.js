@@ -88,7 +88,7 @@ Employee.findById = async function (id) {
     ...doc,
     id: doc._id,
     department_name: doc.department?.name,
-    department_code: d.department?.code,
+    department_code: doc.department?.code,
     department_id: doc.department?._id,
     first_name: doc.first_name || doc.firstName,
     last_name: doc.last_name || doc.lastName,
@@ -97,7 +97,7 @@ Employee.findById = async function (id) {
 
 Employee.create = async function (data) {
   const payload = {
-    user: data.user_id || undefined,
+    user: data.user_id || data.user || undefined,
     department: data.department_id || data.department,
     first_name: data.first_name || data.firstName,
     last_name: data.last_name || data.lastName,

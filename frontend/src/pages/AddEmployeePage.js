@@ -21,7 +21,9 @@ export default function AddEmployeePage() {
     status: 'active',
     create_user_account: false,
     password: '',
+    password: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [photo, setPhoto] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -131,7 +133,12 @@ export default function AddEmployeePage() {
           {form.create_user_account && (
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input name="password" type="password" value={form.password} onChange={handleChange} className="input-field" />
+              <div className="relative">
+                <input name="password" type={showPassword ? "text" : "password"} value={form.password} onChange={handleChange} className="input-field pr-16" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none">
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
             </div>
           )}
         </div>

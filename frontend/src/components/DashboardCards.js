@@ -4,19 +4,19 @@ export default function DashboardCards({ cards }) {
       {cards.map((card) => (
         <div
           key={card.title}
-          className="card p-6 hover:shadow-md transition-all rounded-2xl"
+          className="card p-6 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 rounded-2xl cursor-default"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-gray-500">{card.title}</p>
-              <p className="text-2xl font-bold text-dark mt-1">{card.value}</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{card.title}</p>
+              <p className="text-2xl font-bold text-dark dark:text-white mt-1">{card.value}</p>
               {card.subtitle && (
-                <p className="text-xs text-gray-400 mt-1">{card.subtitle}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{card.subtitle}</p>
               )}
             </div>
             {card.icon && (
-              <div className={`p-3 rounded-lg ${card.iconBg || 'bg-primary-100'}`}>
-                <span className="text-2xl">{card.icon}</span>
+              <div className={`p-3 rounded-xl ${card.iconBg || 'bg-primary-50 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400'}`}>
+                <span className="text-2xl drop-shadow-sm">{card.icon}</span>
               </div>
             )}
           </div>

@@ -1,5 +1,6 @@
 const Attendance = require('../models/Attendance');
 const Employee = require('../models/Employee');
+const hasManagerAccess = (role) => ['admin', 'hr', 'hr_manager'].includes(role);
 
 exports.clockIn = async (req, res) => {
   try {
@@ -59,15 +60,25 @@ exports.clockOut = async (req, res) => {
 
 exports.getByEmployee = async (req, res) => {
   try {
-    const employeeId = req.params.employeeId || (await Employee.findByUserId(req.user.id))?.id;
+    const ownEmployee = await Employee.findByUserId(req.user.id);
+    const requestedEmployeeId = req.params.employeeId;
+    const employeeId = requestedEmployeeId || ownEmployee?.id;
+    if (!employeeId) {
+      return res.status(400).json({ success: false, message: 'Employee ID required' });
+    }
+
+    if (!hasManagerAccess(req.user.role) && ownEmployee && employeeId.toString() !== ownEmployee.id.toString()) {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+
     const { start_date, end_date } = req.query;
     const end = end_date || new Date().toISOString().split('T')[0];
     const start = start_date || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
     const records = await Attendance.findByEmployee(employeeId, start, end);
-    res.json(records);
+    res.json({ success: true, data: records });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -76,9 +87,14 @@ exports.getMonthlyReport = async (req, res) => {
     const { month } = req.query;
     const reportMonth = month || new Date().toISOString().slice(0, 7);
     const report = await Attendance.getMonthlyReport(reportMonth);
-    res.json(report);
+    if (req.user.role === 'employee') {
+      const ownEmployee = await Employee.findByUserId(req.user.id);
+      const filtered = ownEmployee ? report.filter((r) => r.employee_id?.toString() === ownEmployee.id?.toString()) : [];
+      return res.json({ success: true, data: filtered });
+    }
+    res.json({ success: true, data: report });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
