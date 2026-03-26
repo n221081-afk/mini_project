@@ -418,8 +418,20 @@ export default function DashboardPage() {
               {deptChartData ? <DoughnutChart data={deptChartData} height={280} /> : <div className="h-[280px] flex items-center justify-center text-gray-500">No data</div>}
             </div>
             <div className="card p-6">
-              <h2 className="text-lg font-semibold mb-4">Attendance Statistics</h2>
-              {attendanceChartData ? <DoughnutChart data={attendanceChartData} height={280} /> : <div className="h-[280px] flex items-center justify-center text-gray-500">No data</div>}
+              <h2 className="text-lg font-semibold mb-4">Attendance (Today's Headcount)</h2>
+              <DoughnutChart 
+                data={{
+                  labels: ['Present', 'Absent'],
+                  datasets: [{
+                    data: [
+                      stats?.present_today ?? presentTodayDummy,
+                      (stats?.active_employees ?? activeEmployeesDummy) - (stats?.present_today ?? presentTodayDummy)
+                    ],
+                    backgroundColor: ['#14b8a6', '#ef4444']
+                  }]
+                }} 
+                height={280} 
+              />
             </div>
           </div>
           {user?.role !== 'admin' && (

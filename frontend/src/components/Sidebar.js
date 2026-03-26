@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const allMenuItems = [
   { path: '/', icon: 'dashboard', label: 'Dashboard', roles: ['admin', 'hr', 'employee'] },
@@ -31,6 +32,7 @@ const icons = {
 
 export default function Sidebar({ open, onClose }) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const role = user?.role === 'hr_manager' ? 'hr' : user?.role || 'employee';
   const menuItems = allMenuItems.filter((item) => !item.roles || item.roles.includes(role));
 
@@ -44,7 +46,7 @@ export default function Sidebar({ open, onClose }) {
         />
       )}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-30 w-64 bg-white dark:bg-[#0b1220] border-r border-gray-100 dark:border-white/10 transform transition-transform duration-200 ease-in-out ${
+        className={`fixed lg:sticky lg:top-0 lg:max-h-screen inset-y-0 left-0 z-30 w-64 bg-white dark:bg-[#0b1220] border-r border-gray-100 dark:border-white/10 transform transition-transform duration-200 ease-in-out ${
           open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
@@ -67,7 +69,7 @@ export default function Sidebar({ open, onClose }) {
                 <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icons[item.icon]} />
                 </svg>
-                {item.label}
+                {t(item.label)}
               </NavLink>
             ))}
           </nav>

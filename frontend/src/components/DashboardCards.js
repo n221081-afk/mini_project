@@ -4,9 +4,9 @@ export default function DashboardCards({ cards }) {
       {cards.map((card) => (
         <div
           key={card.title}
-          className="card p-6 hover:shadow-md transition-all rounded-2xl"
+          className="card p-6 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 rounded-2xl cursor-default"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{card.title}</p>
               <p className="text-2xl font-bold text-dark dark:text-white mt-1">{card.value}</p>

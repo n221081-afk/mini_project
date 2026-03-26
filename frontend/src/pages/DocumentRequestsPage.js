@@ -137,7 +137,7 @@ export default function DocumentRequestsPage() {
       <Modal isOpen={showApply} onClose={() => setShowApply(false)} title="Request Official Document">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">Document Type</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Document Type</label>
             <select className="input-field" value={form.request_type} onChange={e => setForm({...form, request_type: e.target.value})}>
               <option value="Document Bundle">Document Bundle</option>
               <option value="Experience Letter">Experience Letter</option>
@@ -147,11 +147,11 @@ export default function DocumentRequestsPage() {
             </select>
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">Subject / Reason</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Subject / Reason</label>
             <input type="text" required className="input-field" value={form.subject} onChange={e => setForm({...form, subject: e.target.value})} placeholder="e.g. For visa purpose" />
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">Additional Details</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Additional Details</label>
             <textarea className="input-field" rows="3" value={form.message} onChange={e => setForm({...form, message: e.target.value})} placeholder="Any specific details you want included..."></textarea>
           </div>
           <div className="pt-2 flex gap-3">

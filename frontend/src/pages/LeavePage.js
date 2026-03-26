@@ -141,18 +141,18 @@ export default function LeavePage() {
       {error && <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>}
       {success && <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm">{success}</div>}
       {stats && (
-        <div className="grid grid-cols-3 gap-4">
-          <div className="card p-4">
-            <p className="text-sm text-gray-500">Pending</p>
-            <p className="text-2xl font-bold">{stats.pending ?? 0}</p>
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="card p-4 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Pending</p>
+            <p className="text-2xl font-bold dark:text-white">{stats.pending ?? 0}</p>
           </div>
-          <div className="card p-4">
-            <p className="text-sm text-gray-500">Approved</p>
-            <p className="text-2xl font-bold text-primary-600">{stats.approved ?? 0}</p>
+          <div className="card p-4 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Approved</p>
+            <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{stats.approved ?? 0}</p>
           </div>
-          <div className="card p-4">
-            <p className="text-sm text-gray-500">Rejected</p>
-            <p className="text-2xl font-bold text-red-600">{stats.rejected ?? 0}</p>
+          <div className="card p-4 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Rejected</p>
+            <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.rejected ?? 0}</p>
           </div>
         </div>
       )}
@@ -163,7 +163,7 @@ export default function LeavePage() {
       >
         <form onSubmit={handleApply} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">Leave Type</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Leave Type</label>
             <select
               value={form.leave_type}
               onChange={(e) => setForm((f) => ({ ...f, leave_type: e.target.value }))}
@@ -176,16 +176,16 @@ export default function LeavePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Start Date</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Start Date</label>
               <input type="date" value={form.start_date} onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))} className="input-field" required />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">End Date</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-200">End Date</label>
               <input type="date" value={form.end_date} onChange={(e) => setForm((f) => ({ ...f, end_date: e.target.value }))} className="input-field" required />
             </div>
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">Reason</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Reason</label>
             <textarea value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))} className="input-field" rows={3} placeholder="Please provide a brief reason for your leave request..." />
           </div>
           <div className="pt-4 flex gap-3">

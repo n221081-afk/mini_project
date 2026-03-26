@@ -74,12 +74,13 @@ export default function PerformancePage() {
     { key: 'comments', label: 'Comments' },
   ];
 
+  const topData = [...data].sort((a, b) => b.rating - a.rating).slice(0, 8);
   const chartData = {
-    labels: data.slice(0, 8).map((r) => r.employee_code),
+    labels: topData.map((r) => r.employee_code),
     datasets: [
       {
         label: 'Rating',
-        data: data.slice(0, 8).map((r) => r.rating),
+        data: topData.map((r) => r.rating),
         backgroundColor: '#3b82f6',
       },
     ],

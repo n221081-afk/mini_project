@@ -97,7 +97,7 @@ Employee.findById = async function (id) {
 
 Employee.create = async function (data) {
   const payload = {
-    user: data.user_id || undefined,
+    user: data.user_id || data.user || undefined,
     department: data.department_id || data.department,
     first_name: data.first_name || data.firstName,
     last_name: data.last_name || data.lastName,
