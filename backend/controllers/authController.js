@@ -102,3 +102,59 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+exports.register = async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Name, email, and password are required' });
+    }
+
+    const existingUser = await User.findByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'User already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUserId = await User.createUser({
+      name,
+      email,
+      password: hashedPassword,
+      role: role || 'employee'
+    });
+
+    res.status(201).json({ 
+      success: true, 
+      message: 'User registered successfully', 
+      user: { id: newUserId, name, email, role: role || 'employee' } 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
+  }
+};
+
+exports.setupAdmin = async (req, res) => {
+  try {
+    const adminExists = await User.findOne({ role: 'admin' }).lean();
+    if (adminExists) {
+      return res.status(400).json({ success: false, message: 'Admin already exists' });
+    }
+    
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    await User.create({
+      name: 'System Admin',
+      email: 'admin@enterprisehr.com',
+      password: hashedPassword,
+      role: 'admin'
+    });
+    
+    res.status(201).json({ 
+      success: true, 
+      message: 'Fallback admin created successfully', 
+      email: 'admin@enterprisehr.com', 
+      password: 'admin123' 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
+  }
+};
